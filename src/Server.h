@@ -37,7 +37,7 @@ private:
 
     void handleNewConnection();
 
-    void handleClientData();
+    void handleClientData(int client_fd);
 
-    void handleClientDisconnect();
+    void handleClientDisconnect(int client_fd);
 };

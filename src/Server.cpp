@@ -13,6 +13,7 @@
 // #include "GameRoom.h"
 
 #define MAX_EVENTS 64
+#define MAX_BUF 256
 
 using namespace std;
 
@@ -43,6 +44,7 @@ Server::~Server()
 void Server::run()
 {
     handleNewConnection();
+    // handleClientData();
 }
 
 void Server::createRoom()
@@ -98,10 +100,15 @@ void Server::handleNewConnection()
     }
 }
 
-void Server::handleClientData()
+void Server::handleClientData(int client_fd)
 {
+    char buf[MAX_BUF];
+
+    int rmsg = read(client_fd, buf, MAX_BUF);
 }
 
-void Server::handleClientDisconnect()
+void Server::handleClientDisconnect(int client_fd)
 {
+
+    //~Player();
 }
