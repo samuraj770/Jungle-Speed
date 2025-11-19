@@ -5,6 +5,8 @@
 #include <netinet/in.h>
 #include <memory>
 
+#define MAX_EVENTS 64
+
 using namespace std;
 
 class Player;
@@ -28,6 +30,8 @@ private:
     int port;
     int server_fd;
     int epoll_fd;
+    epoll_event event;
+    epoll_event events[MAX_EVENTS];
 
     map<int, shared_ptr<Player>> clients; // polaczeni klienci
 
