@@ -15,7 +15,7 @@ TARGET = jungle_server
 # Plik Protocol.h nie jest tu potrzebny, bo to tylko nagłówek
 SRCS = src/main.cpp \
        src/Server.cpp \
-       #src/Player.cpp \
+       src/Player.cpp \
        #src/GameRoom.cpp \
        #src/GameState.cpp \
        #src/Utils.cpp 

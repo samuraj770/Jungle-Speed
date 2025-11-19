@@ -21,11 +21,11 @@ public:
 
     void run();
 
-    void createRoom();
+    void createRoom(const string &roomName, shared_ptr<Player> host);
 
-    void joinRoom();
+    void joinRoom(const string &roomName, shared_ptr<Player> player);
 
-    void removeRoom();
+    void removeRoom(const string &roomName);
 
 private:
     int port;
@@ -34,9 +34,12 @@ private:
     epoll_event event;
     epoll_event events[MAX_EVENTS];
 
-    map<int, shared_ptr<Player>> clients; // polaczeni klienci
+    // map<klucz, wartosc>
+    // polaczeni klienci
+    map<int, shared_ptr<Player>> clients;
 
-    map<string, shared_ptr<GameRoom>> rooms; // aktywne pokoje
+    // aktywne pokoje
+    map<string, shared_ptr<GameRoom>> rooms;
 
     void setupNetwork();
 

@@ -1,5 +1,3 @@
-#pragma once
-
 #include <unistd.h>
 
 #include "Player.h"

@@ -1,12 +1,10 @@
 #include <iostream>
 #include <sys/socket.h>
-#include <netinet/in.h>
 #include <unistd.h>
 #include <fcntl.h>
 
 #include "Server.h"
-
-// #include "Player.h"
+#include "Player.h"
 // #include "GameRoom.h"
 
 #define MAX_BUF 256
@@ -57,16 +55,41 @@ void Server::run()
     }
 }
 
-void Server::createRoom()
+void Server::createRoom(const string &roomName, shared_ptr<Player> host)
 {
+    if (this->rooms.find(roomName) != this->rooms.end())
+    {
+        cout << "Pokoj o podanej nazwie istnieje" << endl;
+        return;
+    }
+
+    auto newRoom = make_shared<GameRoom>(roomName, host);
+    this->rooms[roomName] = newRoom;
+
+    // newRoom -> addPlayer(host);
+    // cout << "Gracz (fd: " << host->getSocketFd() << ") utworzył pokój: " << roomName << endl;
 }
 
-void Server::joinRoom()
+void Server::joinRoom(const string &roomName, shared_ptr<Player> player)
 {
+    auto room_it = this->rooms.find(roomName);
+    if (room_it != this->rooms.end())
+    {
+        cout << "Pokoj o podanej nazwie istnieje" << endl;
+        return;
+    }
+
+    shared_ptr<GameRoom> room = room_it->second;
+    // tryb widza i pelny pokoj zrobic
+
+    // room->addPlayer(player);
 }
 
-void Server::removeRoom()
+void Server::removeRoom(const string &roomName)
 {
+    auto room_it = this->rooms.find(roomName);
+    this->rooms.erase(room_it);
+    cout << "Pokój " << roomName << " został usunięty." << endl;
 }
 
 void Server::setupNetwork()
@@ -111,8 +134,8 @@ void Server::handleNewConnection()
     event.data.fd = client_fd;
     epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &event);
 
-    // auto newPlayer = make_shared<Player>(client_fd);
-    // this->clients[client_fd] = newPlayer;
+    auto newPlayer = make_shared<Player>(client_fd);
+    this->clients[client_fd] = newPlayer;
 
     cout << "Nowy klient połączony fd: " << client_fd << endl;
 
@@ -123,7 +146,8 @@ void Server::handleClientData(int client_fd)
 {
     char buf[MAX_BUF];
 
-    // auto player = this->clients.find(client_fd);
+    // auto player_it = this->clients.find(client_fd);  // find zwraca iterator
+    // auto player = player_it->second;
 
     int rmsg = read(client_fd, buf, MAX_BUF);
 
@@ -133,6 +157,7 @@ void Server::handleClientData(int client_fd)
         {
             buf[rmsg] = '\0';
             cout << "Klient " << client_fd << " napisal: " << buf << endl;
+            // player->processMessage()
         }
     }
     else
@@ -143,6 +168,9 @@ void Server::handleClientData(int client_fd)
 
 void Server::handleClientDisconnect(int client_fd)
 {
+    // auto player_it = this->clients.find(client_fd);  // find zwraca iterator
+    // auto player = player_it->second;
+
     cout << "Klient rozłączyl sie fd: " << client_fd << endl;
 
     epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, client_fd, nullptr);
