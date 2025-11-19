@@ -4,6 +4,7 @@
 #include <string>
 #include <netinet/in.h>
 #include <memory>
+#include <sys/epoll.h>
 
 #define MAX_EVENTS 64
 

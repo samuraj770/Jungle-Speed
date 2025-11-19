@@ -1,7 +1,4 @@
 #include <iostream>
-#include <map>
-#include <memory>
-#include <sys/epoll.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
@@ -43,8 +40,6 @@ Server::~Server()
 
 void Server::run()
 {
-
-    // handleClientData();
     while (true)
     {
         int ready = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
@@ -134,8 +129,11 @@ void Server::handleClientData(int client_fd)
 
     if (rmsg > 0)
     {
-        cout << "Klient " << client_fd << " napisal: ";
-        write(STDOUT_FILENO, buf, rmsg);
+        if (rmsg < MAX_BUF)
+        {
+            buf[rmsg] = '\0';
+            cout << "Klient " << client_fd << " napisal: " << buf << endl;
+        }
     }
     else
     {
