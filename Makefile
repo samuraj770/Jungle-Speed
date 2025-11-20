@@ -16,9 +16,9 @@ TARGET = jungle_server
 SRCS = src/main.cpp \
        src/Server.cpp \
        src/Player.cpp \
-       #src/GameRoom.cpp \
+       src/Utils.cpp \
        #src/GameState.cpp \
-       #src/Utils.cpp 
+       #src/GameRoom.cpp 
        # Dodaj tu inne swoje pliki .cpp, jeśli je masz
 
 # Automatycznie zamień listę .cpp na listę .o (pliki obiektowe)

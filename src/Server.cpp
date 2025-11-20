@@ -5,6 +5,7 @@
 
 #include "Server.h"
 #include "Player.h"
+#include "Utils.h"
 // #include "GameRoom.h"
 
 #define MAX_BUF 256
@@ -55,16 +56,19 @@ void Server::run()
     }
 }
 
-void Server::createRoom(const string &roomName, shared_ptr<Player> host)
+void Server::createRoom(shared_ptr<Player> host)
 {
-    if (this->rooms.find(roomName) != this->rooms.end())
+    string roomName = generateRoomCode();
+    while (this->rooms.find(roomName) != this->rooms.end())
     {
         cout << "Pokoj o podanej nazwie istnieje" << endl;
-        return;
+        roomName = generateRoomCode();
     }
 
-    auto newRoom = make_shared<GameRoom>(roomName, host);
-    this->rooms[roomName] = newRoom;
+    cout << "Utworzono pokoj: " << roomName << endl;
+    // zrobic generowanie kodu pokoju
+    // auto newRoom = make_shared<GameRoom>(roomName, host);
+    // this->rooms[roomName] = newRoom;
 
     // newRoom -> addPlayer(host);
     // cout << "Gracz (fd: " << host->getSocketFd() << ") utworzył pokój: " << roomName << endl;

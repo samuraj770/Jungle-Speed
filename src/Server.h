@@ -15,18 +15,6 @@ class GameRoom;
 
 class Server
 {
-public:
-    Server(int port); // Konstruktor
-    ~Server();        // Destruktor
-
-    void run();
-
-    void createRoom(const string &roomName, shared_ptr<Player> host);
-
-    void joinRoom(const string &roomName, shared_ptr<Player> player);
-
-    void removeRoom(const string &roomName);
-
 private:
     int port;
     int server_fd;
@@ -48,4 +36,16 @@ private:
     void handleClientData(int client_fd);
 
     void handleClientDisconnect(int client_fd);
+
+public:
+    Server(int port); // Konstruktor
+    ~Server();        // Destruktor
+
+    void run();
+
+    void createRoom(shared_ptr<Player> host);
+
+    void joinRoom(const string &roomName, shared_ptr<Player> player);
+
+    void removeRoom(const string &roomName);
 };
