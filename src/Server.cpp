@@ -21,7 +21,7 @@ Server::Server(int port) : port(port)
 {
     try
     {
-        setupNetwork();
+        setUpNetwork();
     }
     catch (exception &e)
     {
@@ -66,20 +66,19 @@ void Server::createRoom(shared_ptr<Player> host)
     }
 
     cout << "Utworzono pokoj: " << roomName << endl;
-    // zrobic generowanie kodu pokoju
     // auto newRoom = make_shared<GameRoom>(roomName, host);
     // this->rooms[roomName] = newRoom;
 
     // newRoom -> addPlayer(host);
-    // cout << "Gracz (fd: " << host->getSocketFd() << ") utworzył pokój: " << roomName << endl;
+    host->sendMessage(string("ACCEPT_CR_ROOM") + " " + roomName);
 }
 
 void Server::joinRoom(const string &roomName, shared_ptr<Player> player)
 {
     auto room_it = this->rooms.find(roomName);
-    if (room_it != this->rooms.end())
+    if (room_it == this->rooms.end())
     {
-        cout << "Pokoj o podanej nazwie istnieje" << endl;
+        player->sendMessage("JOIN_ERR");
         return;
     }
 
@@ -87,6 +86,7 @@ void Server::joinRoom(const string &roomName, shared_ptr<Player> player)
     // tryb widza i pelny pokoj zrobic
 
     // room->addPlayer(player);
+    player->sendMessage("ACCEPT_JOIN");
 }
 
 void Server::removeRoom(const string &roomName)
@@ -96,7 +96,7 @@ void Server::removeRoom(const string &roomName)
     cout << "Pokój " << roomName << " został usunięty." << endl;
 }
 
-void Server::setupNetwork()
+void Server::setUpNetwork()
 {
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -142,16 +142,14 @@ void Server::handleNewConnection()
     this->clients[client_fd] = newPlayer;
 
     cout << "Nowy klient połączony fd: " << client_fd << endl;
-
-    write(client_fd, "Witaj! Jestem serwer!", 22);
 }
 
 void Server::handleClientData(int client_fd)
 {
     char buf[MAX_BUF];
 
-    // auto player_it = this->clients.find(client_fd);  // find zwraca iterator
-    // auto player = player_it->second;
+    auto player_it = this->clients.find(client_fd); // find zwraca iterator
+    auto player = player_it->second;
 
     int rmsg = read(client_fd, buf, MAX_BUF);
 
@@ -159,9 +157,10 @@ void Server::handleClientData(int client_fd)
     {
         if (rmsg < MAX_BUF)
         {
-            buf[rmsg] = '\0';
+            buf[rmsg - 1] = '\0';
+            string message(buf);
             cout << "Klient " << client_fd << " napisal: " << buf << endl;
-            // player->processMessage()
+            player->processMessage(message, this);
         }
     }
     else
@@ -172,8 +171,8 @@ void Server::handleClientData(int client_fd)
 
 void Server::handleClientDisconnect(int client_fd)
 {
-    // auto player_it = this->clients.find(client_fd);  // find zwraca iterator
-    // auto player = player_it->second;
+    auto player_it = this->clients.find(client_fd); // find zwraca iterator
+    auto player = player_it->second;
 
     cout << "Klient rozłączyl sie fd: " << client_fd << endl;
 

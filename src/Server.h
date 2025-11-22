@@ -29,7 +29,7 @@ private:
     // aktywne pokoje
     map<string, shared_ptr<GameRoom>> rooms;
 
-    void setupNetwork();
+    void setUpNetwork();
 
     void handleNewConnection();
 

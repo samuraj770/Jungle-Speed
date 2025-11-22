@@ -3,7 +3,7 @@
 
 #include "Utils.h"
 
-#define MAX_LENGTH 6
+#define MAX_LENGTH 4
 
 using namespace std;
 

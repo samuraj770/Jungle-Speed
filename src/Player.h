@@ -9,7 +9,7 @@ using namespace std;
 class Server;
 class GameRoom;
 
-class Player
+class Player : public enable_shared_from_this<Player>
 {
 private:
     int fd; // deskryptor pliku gracza (klienta)
@@ -27,7 +27,9 @@ public:
 
     void setRoom(shared_ptr<GameRoom> room);
 
-    void leaveRoom();
+    void quitRoom();
+
+    shared_ptr<GameRoom> getRoom();
 
     int getFd() const { return fd; }
 
