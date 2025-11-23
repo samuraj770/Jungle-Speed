@@ -23,14 +23,15 @@ void Player::processMessage(const string &message, Server *server)
     if (command == "CREATE_ROOM")
     {
         server->createRoom(shared_from_this());
+        issMessage >> this->nick;
     }
     else if (command == "JOIN_ROOM")
     {
         string roomName;
         issMessage >> roomName;
-        server->joinRoom(roomName, shared_from_this());
         issMessage >> this->nick;
         cout << "Nick gracza: " << this->nick << endl;
+        server->joinRoom(roomName, shared_from_this());
     }
     else if (command == "QUIT_ROOM")
     {
@@ -48,7 +49,7 @@ void Player::processMessage(const string &message, Server *server)
 
 void Player::sendMessage(const string &message)
 {
-    write(fd, (message + "%").c_str(), message.length() + 1); // sprawidzic \0
+    write(fd, (message + "%").c_str(), message.length() + 1);
 }
 
 void Player::setRoom(shared_ptr<GameRoom> room)

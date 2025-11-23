@@ -68,6 +68,7 @@ void Server::createRoom(shared_ptr<Player> host)
     cout << "Utworzono pokoj: " << roomName << endl;
     // auto newRoom = make_shared<GameRoom>(roomName, host);
     // this->rooms[roomName] = newRoom;
+    this->rooms[roomName] = nullptr;
 
     // newRoom -> addPlayer(host);
     host->sendMessage(string("ACCEPT_CR_ROOM") + " " + roomName);
@@ -78,12 +79,13 @@ void Server::joinRoom(const string &roomName, shared_ptr<Player> player)
     auto room_it = this->rooms.find(roomName);
     if (room_it == this->rooms.end())
     {
-        player->sendMessage("JOIN_ERR");
+        player->sendMessage("JOIN_ERR 0");
         return;
     }
 
     shared_ptr<GameRoom> room = room_it->second;
     // tryb widza i pelny pokoj zrobic
+    // zrobic rozglaszanie nickow
 
     // room->addPlayer(player);
     player->sendMessage("ACCEPT_JOIN");
