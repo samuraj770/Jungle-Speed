@@ -89,9 +89,9 @@ void Server::joinRoom(const string &roomName, shared_ptr<Player> player)
     room->addPlayer(player);
 
     string nicks = room->getPlayerNicks();
-    string msg = string("ACCEPT_JOIN#") +
-                 to_string(room->isGameActive()) + "#" +   // kod czy aktywny gra
-                 to_string(room->getPlayerCount()) + "#" + // liczba aktywnych graczy
+    string msg = string("ACCEPT_JOIN") + " " +
+                 to_string(room->isGameActive()) + " " +   // kod czy aktywny gra
+                 to_string(room->getPlayerCount()) + " " + // liczba aktywnych graczy
                  to_string(room->getPlayerCount()) +       // liczba graczy w pokoju
                  nicks;
     player->sendMessage(msg);
@@ -101,7 +101,6 @@ void Server::removeRoom(const string &roomName)
 {
     auto room_it = this->rooms.find(roomName);
     this->rooms.erase(room_it);
-    cout << "Pokój " << roomName << " został usunięty." << endl;
 }
 
 void Server::setUpNetwork()

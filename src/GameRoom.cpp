@@ -7,14 +7,18 @@ using namespace std;
 
 GameRoom::GameRoom(string name, shared_ptr<Player> host)
 {
+    this->name = name;
+    this->host = host;
 }
 
-GameRoom::~GameRoom()
-{
-}
+GameRoom::~GameRoom() {}
 
-void GameRoom::addPlayer(shared_ptr<Player> player)
+void GameRoom::addPlayer(shared_ptr<Player> newPlayer)
 {
+    players.push_back(newPlayer);
+
+    string msg = string("PLAYER_NEW") + " " + newPlayer->getNick();
+    broadcastMessage(msg, newPlayer);
 }
 
 void GameRoom::handlePlayerDisconnect(shared_ptr<Player> player)
@@ -23,6 +27,13 @@ void GameRoom::handlePlayerDisconnect(shared_ptr<Player> player)
 
 void GameRoom::broadcastMessage(const string &message, shared_ptr<Player> excludePlayer)
 {
+    for (auto &player : players)
+    {
+        if (player != excludePlayer)
+        {
+            player->sendMessage(message);
+        }
+    }
 }
 
 void GameRoom::handleGameAction(shared_ptr<Player> player, const string &command)
@@ -39,7 +50,7 @@ string GameRoom::getPlayerNicks() const
     string nicks;
     for (const auto &player : this->players)
     {
-        nicks += "#";
+        nicks += " ";
         nicks += player->getNick();
     }
     return nicks;
