@@ -17,8 +17,8 @@ SRCS = src/main.cpp \
        src/Server.cpp \
        src/Player.cpp \
        src/Utils.cpp \
-       #src/GameState.cpp \
-       #src/GameRoom.cpp 
+       src/GameRoom.cpp \
+       #src/GameState.cpp
        # Dodaj tu inne swoje pliki .cpp, jeśli je masz
 
 # Automatycznie zamień listę .cpp na listę .o (pliki obiektowe)

@@ -2,11 +2,12 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <vector>
 
 #include "Server.h"
 #include "Player.h"
 #include "Utils.h"
-// #include "GameRoom.h"
+#include "GameRoom.h"
 
 #define MAX_BUF 256
 
@@ -66,11 +67,10 @@ void Server::createRoom(shared_ptr<Player> host)
     }
 
     cout << "Utworzono pokoj: " << roomName << endl;
-    // auto newRoom = make_shared<GameRoom>(roomName, host);
-    // this->rooms[roomName] = newRoom;
-    this->rooms[roomName] = nullptr;
+    auto newRoom = make_shared<GameRoom>(roomName, host);
+    this->rooms[roomName] = newRoom;
 
-    // newRoom -> addPlayer(host);
+    newRoom->addPlayer(host);
     host->sendMessage(string("ACCEPT_CR_ROOM") + " " + roomName);
 }
 
@@ -85,10 +85,16 @@ void Server::joinRoom(const string &roomName, shared_ptr<Player> player)
 
     shared_ptr<GameRoom> room = room_it->second;
     // tryb widza i pelny pokoj zrobic
-    // zrobic rozglaszanie nickow
 
-    // room->addPlayer(player);
-    player->sendMessage("ACCEPT_JOIN");
+    room->addPlayer(player);
+
+    string nicks = room->getPlayerNicks();
+    string msg = string("ACCEPT_JOIN#") +
+                 to_string(room->isGameActive()) + "#" +   // kod czy aktywny gra
+                 to_string(room->getPlayerCount()) + "#" + // liczba aktywnych graczy
+                 to_string(room->getPlayerCount()) +       // liczba graczy w pokoju
+                 nicks;
+    player->sendMessage(msg);
 }
 
 void Server::removeRoom(const string &roomName)

@@ -3,8 +3,7 @@
 
 #include "Player.h"
 #include "Server.h"
-
-// #include "GameRoom.h"
+#include "GameRoom.h"
 
 using namespace std;
 
@@ -59,6 +58,8 @@ void Player::setRoom(shared_ptr<GameRoom> room)
 
 void Player::quitRoom()
 {
+    auto room = getRoom();
+    // room->removePlayer(shared_from_this());
 }
 
 shared_ptr<GameRoom> Player::getRoom()

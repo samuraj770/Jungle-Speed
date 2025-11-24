@@ -16,18 +16,16 @@ class GameRoom;
 class Server
 {
 private:
-    int port;
-    int server_fd;
-    int epoll_fd;
+    int port;      // port na ktorym nasluchuje serwer
+    int server_fd; // deskryptor serwera
+    int epoll_fd;  // deskryptor mechanizmu epoll
     epoll_event event;
     epoll_event events[MAX_EVENTS];
 
     // map<klucz, wartosc>
-    // polaczeni klienci
-    map<int, shared_ptr<Player>> clients;
+    map<int, shared_ptr<Player>> clients; // polaczeni klienci
 
-    // aktywne pokoje
-    map<string, shared_ptr<GameRoom>> rooms;
+    map<string, shared_ptr<GameRoom>> rooms; // aktywne pokoje
 
     void setUpNetwork();
 
