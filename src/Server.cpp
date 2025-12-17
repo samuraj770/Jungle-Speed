@@ -91,7 +91,7 @@ void Server::joinRoom(const string &roomName, shared_ptr<Player> player)
     string nicks = room->getPlayerNicks();
     string msg = string("ACCEPT_JOIN") + " " +
                  to_string(room->isGameActive()) + " " +   // kod czy aktywny gra
-                 to_string(room->getPlayerCount()) + " " + // liczba aktywnych graczy
+                 to_string(room->getPlayerCount()) + " " + // liczba aktywnych graczy @todo
                  to_string(room->getPlayerCount()) +       // liczba graczy w pokoju
                  nicks;
     player->sendMessage(msg);
@@ -182,6 +182,11 @@ void Server::handleClientDisconnect(int client_fd)
     auto player = player_it->second;
 
     cout << "Klient rozłączyl sie fd: " << client_fd << endl;
+
+    // player->quitRoom();
+    // powiadomienie pokoju o rozlaczeniu gracza
+    // rozkminic czy wiadomosc quit room potrzebna bo wyjscie z gry = rozlaczenie
+    // rozlaczenie przez read=0 oraz przez komende moze powodowac podwojna probe opuszczenia pokoju
 
     epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, client_fd, nullptr);
 

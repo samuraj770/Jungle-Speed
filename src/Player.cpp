@@ -41,8 +41,9 @@ void Player::processMessage(const string &message, Server *server)
         auto room = getRoom();
         if (room)
         {
-            // room->handleGameAction();
+            room->handleGameAction(shared_from_this(), command);
         }
+        currentRoom.reset();
     }
 }
 

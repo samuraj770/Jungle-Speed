@@ -1,9 +1,20 @@
+#include <algorithm>
+
 #include "Server.h"
 #include "Player.h"
 #include "GameRoom.h"
+
 // #include "GameState.h"
 
 using namespace std;
+
+void GameRoom::assignNewHost()
+{
+    if (players.empty())
+        return;
+
+    this->host = players[0];
+}
 
 GameRoom::GameRoom(string name, shared_ptr<Player> host)
 {
@@ -23,6 +34,24 @@ void GameRoom::addPlayer(shared_ptr<Player> newPlayer)
 
 void GameRoom::handlePlayerDisconnect(shared_ptr<Player> player)
 {
+    auto it = remove(players.begin(), players.end(), player);
+    if (it != players.end())
+    {
+        players.erase(it, players.end());
+    }
+
+    string msg = string("PLAYER_DISC") + " " + player->getNick();
+    broadcastMessage(msg);
+
+    if (player == this->host)
+    {
+        assignNewHost();
+    }
+
+    /*if(gameActive && gameState)
+    {
+        gameState->removePlayer(player);
+    }*/
 }
 
 void GameRoom::broadcastMessage(const string &message, shared_ptr<Player> excludePlayer)
