@@ -8,6 +8,14 @@
 
 using namespace std;
 
+void GameRoom::startGame()
+{
+}
+
+void GameRoom::endGame()
+{
+}
+
 void GameRoom::assignNewHost()
 {
     if (players.empty())

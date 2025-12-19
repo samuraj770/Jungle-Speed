@@ -188,7 +188,7 @@ void Server::handleClientDisconnect(int client_fd)
 
     cout << "Klient rozłączyl sie fd: " << client_fd << endl;
 
-    // player->quitRoom();
+    player->quitRoom();
     // powiadomienie pokoju o rozlaczeniu gracza
     // rozkminic czy wiadomosc quit room potrzebna bo wyjscie z gry = rozlaczenie
     // rozlaczenie przez read=0 oraz przez komende moze powodowac podwojna probe opuszczenia pokoju
