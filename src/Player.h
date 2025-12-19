@@ -14,10 +14,11 @@ class Player : public enable_shared_from_this<Player>
 private:
     int fd;                         // deskryptor pliku gracza (klienta)
     string nick;                    // nazwa gracza
-    string buf;                     // bufor do przechowywania wiadomosci
     weak_ptr<GameRoom> currentRoom; // wskazanie na pokoj w ktorym gracz sie znajduje
 
 public:
+    string buf; // bufor do przechowywania wiadomosci
+
     Player(int fd);
     ~Player();
 

@@ -162,12 +162,17 @@ void Server::handleClientData(int client_fd)
 
     if (rmsg > 0)
     {
-        if (rmsg < MAX_BUF)
+        player->buf.append(buf, rmsg);
+
+        size_t delimiterPos;
+        while ((delimiterPos = player->buf.find('%')) != string::npos)
         {
-            buf[rmsg - 1] = '\0';
-            string message(buf);
-            cout << "Klient " << client_fd << " napisal: " << buf << endl;
+            string message = player->buf.substr(0, delimiterPos);
+
+            cout << "Klient " << client_fd << " napisal: " << message << endl;
             player->processMessage(message, this);
+
+            player->buf.erase(0, delimiterPos + 1);
         }
     }
     else
