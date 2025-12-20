@@ -5,7 +5,6 @@
 #include <string>
 #include <map>
 #include <memory>
-#include <algorithm>
 
 using namespace std;
 
@@ -17,7 +16,8 @@ enum class CardColor
     RED,
     GREEN,
     BLUE,
-    YELLOW
+    YELLOW,
+    COUNT
 };
 
 // kształty kart
@@ -34,7 +34,8 @@ enum class CardShape
     LINE_VERTICAL,
     STAR_FULL,
     STAR_HOLE_1,
-    STAR_HOLE_2
+    STAR_HOLE_2,
+    COUNT
 };
 
 // struktura opisująca kartę
@@ -78,8 +79,9 @@ private:
     // wektor z graczami uczestniczącymi w pojedynku (może być ich więcej niż 2)
     vector<shared_ptr<Player>> activeDuelists;
 
-    void generateDeck();
-    void dealCards();
+    deque<Card> generateDeck();
+    void shuffleDeck(deque<Card> &deck);
+    void dealCards(deque<Card> &deck);
     void nextTurn();
 
 public:
