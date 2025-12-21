@@ -1,3 +1,4 @@
 *.o
 *.a
 jungle_server
+./vscode/
