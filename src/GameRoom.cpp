@@ -60,6 +60,12 @@ void GameRoom::handlePlayerDisconnect(shared_ptr<Player> player)
     string msg = string("PLAYER_DISC") + " " + player->getNick();
     broadcastMessage(msg);
 
+    if (players.empty())
+    {
+        gameActive = false;
+        return;
+    }
+
     if (player == this->host)
     {
         assignNewHost();

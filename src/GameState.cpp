@@ -60,18 +60,14 @@ GameState::~GameState() {}
 
 void GameState::initialize(const vector<shared_ptr<Player>> &players)
 {
-    cout << "init" << endl;
     this->turnOrder = players;
     this->currentTurnIndex = 0;
     this->playerDecks.clear();
     this->pot.clear();
     this->duelActive = false;
 
-    cout << "generowanie" << endl;
     deque<Card> fullDeck = generateDeck();
-    cout << "tasowanie" << endl;
     shuffleDeck(fullDeck);
-    cout << "rozdawanie" << endl;
     dealCards(fullDeck);
 }
 

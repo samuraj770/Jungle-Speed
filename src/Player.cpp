@@ -58,8 +58,12 @@ void Player::setRoom(shared_ptr<GameRoom> room)
 
 void Player::quitRoom()
 {
-    auto room = getRoom();
-    room->handlePlayerDisconnect(shared_from_this());
+    auto lockedRoom = currentRoom.lock();
+    if (lockedRoom)
+    {
+        lockedRoom->handlePlayerDisconnect(shared_from_this());
+        currentRoom.reset();
+    }
 }
 
 shared_ptr<GameRoom> Player::getRoom()
