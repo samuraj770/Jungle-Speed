@@ -1,4 +1,6 @@
 *.o
 *.a
 jungle_server
-./vscode/
+.vscode/
+.vscode/launch.json
+.vscode/tasks.json

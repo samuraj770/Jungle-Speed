@@ -16,9 +16,9 @@ private:
     vector<shared_ptr<Player>> players; // przechowuje liste graczy w pokoju
     shared_ptr<Player> host;            // wskaznik na hosta
     bool gameActive;                    // czy gra jest aktywna
-    // unique_ptr<GameState> gameState;    // stan gry
+    unique_ptr<GameState> gameState;    // stan gry
 
-    void startGame();
+    void startGame(shared_ptr<Player> player);
 
     void endGame();
 

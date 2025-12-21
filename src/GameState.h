@@ -60,7 +60,7 @@ private:
     struct PlayerDeck
     {
         deque<Card> faceDown; // stos kart zakrytych
-        deque<Card> fadeUp;   // stos kart odkrytych
+        deque<Card> faceUp;   // stos kart odkrytych
     };
 
     // przypisanie talii do graczy
@@ -83,6 +83,7 @@ private:
     void shuffleDeck(deque<Card> &deck);
     void dealCards(deque<Card> &deck);
     void nextTurn();
+    bool checkForDuels();
 
 public:
     GameState();
@@ -90,7 +91,7 @@ public:
 
     void initialize(const vector<shared_ptr<Player>> &players);
 
-    string playerFlipCard(shared_ptr<Player> player);
+    string playerFlipCard(shared_ptr<Player> player); // zwraca id wyłożonej karty
 
     string playerGrabTotem(shared_ptr<Player> player);
 

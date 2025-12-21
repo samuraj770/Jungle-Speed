@@ -3,13 +3,21 @@
 #include "Server.h"
 #include "Player.h"
 #include "GameRoom.h"
-
-// #include "GameState.h"
+#include "GameState.h"
 
 using namespace std;
 
-void GameRoom::startGame()
+void GameRoom::startGame(shared_ptr<Player> player)
 {
+    if (!isHost(player))
+    {
+        cout << "Gracz nie będący hostem nie może zacząć gry" << endl;
+        return;
+    }
+
+    this->gameState = make_unique<GameState>();
+    gameState->initialize(players);
+    broadcastMessage(string("ACCEPT_GAME_START"));
 }
 
 void GameRoom::endGame()
@@ -35,6 +43,7 @@ GameRoom::~GameRoom() {}
 void GameRoom::addPlayer(shared_ptr<Player> newPlayer)
 {
     players.push_back(newPlayer);
+    newPlayer->setRoom(shared_from_this());
 
     string msg = string("PLAYER_NEW") + " " + newPlayer->getNick();
     broadcastMessage(msg, newPlayer);
@@ -56,10 +65,10 @@ void GameRoom::handlePlayerDisconnect(shared_ptr<Player> player)
         assignNewHost();
     }
 
-    /*if(gameActive && gameState)
-    {
-        gameState->removePlayer(player);
-    }*/
+    // if (gameActive && gameState)
+    // {
+    //     gameState->removePlayer(player);
+    // }
 }
 
 void GameRoom::broadcastMessage(const string &message, shared_ptr<Player> excludePlayer)
@@ -75,6 +84,15 @@ void GameRoom::broadcastMessage(const string &message, shared_ptr<Player> exclud
 
 void GameRoom::handleGameAction(shared_ptr<Player> player, const string &command)
 {
+    if (command == "GAME_START")
+    {
+        startGame(player);
+    }
+    else if (command == "CARD_REVEAL")
+    {
+        string msg = gameState->playerFlipCard(player);
+        broadcastMessage(string("CARD_ID") + msg);
+    }
 }
 
 bool GameRoom::isHost(shared_ptr<Player> player) const

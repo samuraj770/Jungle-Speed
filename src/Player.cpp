@@ -43,7 +43,6 @@ void Player::processMessage(const string &message, Server *server)
         {
             room->handleGameAction(shared_from_this(), command);
         }
-        currentRoom.reset();
     }
 }
 
@@ -60,10 +59,10 @@ void Player::setRoom(shared_ptr<GameRoom> room)
 void Player::quitRoom()
 {
     auto room = getRoom();
-    // room->removePlayer(shared_from_this());
+    room->handlePlayerDisconnect(shared_from_this());
 }
 
 shared_ptr<GameRoom> Player::getRoom()
 {
-    return shared_ptr<GameRoom>();
+    return currentRoom.lock();
 }

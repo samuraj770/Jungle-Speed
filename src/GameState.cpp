@@ -49,15 +49,77 @@ void GameState::dealCards(deque<Card> &deck)
     }
 }
 
+void GameState::nextTurn()
+{
+    currentTurnIndex = (currentTurnIndex + 1) % turnOrder.size();
+}
+
+GameState::GameState() {}
+
+GameState::~GameState() {}
+
 void GameState::initialize(const vector<shared_ptr<Player>> &players)
 {
+    cout << "init" << endl;
     this->turnOrder = players;
     this->currentTurnIndex = 0;
     this->playerDecks.clear();
     this->pot.clear();
     this->duelActive = false;
 
+    cout << "generowanie" << endl;
     deque<Card> fullDeck = generateDeck();
+    cout << "tasowanie" << endl;
     shuffleDeck(fullDeck);
+    cout << "rozdawanie" << endl;
     dealCards(fullDeck);
+}
+
+string GameState::playerFlipCard(shared_ptr<Player> player)
+{
+    if (player != turnOrder[currentTurnIndex])
+    {
+        cout << "Błąd kolejki" << endl;
+        return "";
+    }
+
+    // na potrzeby testów końcowo pojedynek nie może blokować tury
+    if (duelActive)
+    {
+        cout << "Trwa pojedynek" << endl;
+        return "";
+    }
+
+    PlayerDeck &deck = playerDecks[player];
+
+    if (deck.faceDown.empty())
+    {
+        nextTurn();          // jeśli gracz nie ma kart na stosie zakrytych to pomijamy jego turę
+        return "CARD_ID -1"; // informujemy klienta o tym że gracz wykonał turę a nie ma kart
+    }
+
+    Card revealedCard = deck.faceDown.front();
+    deck.faceDown.pop_front();
+    deck.faceUp.push_back(revealedCard);
+
+    // bool newDuel = checkForDuels();
+    // if (newDuel)
+    // {
+    //     cout << "Gracze w pojedynku" << endl;
+    //     for (auto duelist : activeDuelists)
+    //     {
+    //         cout << duelist->getNick() << endl;
+    //     }
+    // }
+    // else
+    // {
+    //     nextTurn();
+    // }
+
+    return revealedCard.toString();
+}
+
+string Card::toString() const
+{
+    return to_string((int)color) + " " + to_string((int)shape);
 }
