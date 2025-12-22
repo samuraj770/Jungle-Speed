@@ -65,6 +65,7 @@ void GameState::initialize(const vector<shared_ptr<Player>> &players)
     this->playerDecks.clear();
     this->pot.clear();
     this->duelActive = false;
+    this->activeDuelists.clear();
 
     deque<Card> fullDeck = generateDeck();
     shuffleDeck(fullDeck);
@@ -112,7 +113,54 @@ string GameState::playerFlipCard(shared_ptr<Player> player)
     //     nextTurn();
     // }
 
+    nextTurn();
     return revealedCard.toString();
+}
+
+void GameState::removePlayer(shared_ptr<Player> player)
+{
+    // usuwanie gracza z kolejki
+    auto it = remove(turnOrder.begin(), turnOrder.end(), player);
+    if (it != turnOrder.end())
+    {
+        turnOrder.erase(it, turnOrder.end());
+    }
+
+    // naprawianie indeksu
+    if (currentTurnIndex >= turnOrder.size())
+    {
+        currentTurnIndex = 0;
+    }
+
+    if (playerDecks.count(player))
+    {
+        PlayerDeck &deck = playerDecks[player];
+        while (!deck.faceDown.empty())
+        {
+            pot.push_back(deck.faceDown.front());
+            deck.faceDown.pop_front();
+        }
+        while (!deck.faceUp.empty())
+        {
+            pot.push_back(deck.faceUp.front());
+            deck.faceUp.pop_front();
+        }
+        playerDecks.erase(player);
+        dealCards(pot); // sprawdzić czy działa poprawnie
+    }
+
+    if (duelActive)
+    {
+        auto it = remove(activeDuelists.begin(), activeDuelists.end(), player);
+        if (it != activeDuelists.end())
+        {
+            activeDuelists.erase(it, activeDuelists.end());
+        }
+        if (activeDuelists.size() < 2)
+        {
+            duelActive = false;
+        }
+    }
 }
 
 string Card::toString() const

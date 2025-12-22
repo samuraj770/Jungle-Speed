@@ -16,6 +16,7 @@ void GameRoom::startGame(shared_ptr<Player> player)
     }
 
     this->gameState = make_unique<GameState>();
+    this->gameActive = true;
     gameState->initialize(players);
     broadcastMessage(string("ACCEPT_GAME_START"));
 }
@@ -36,6 +37,7 @@ GameRoom::GameRoom(string name, shared_ptr<Player> host)
 {
     this->name = name;
     this->host = host;
+    this->gameActive = false;
 }
 
 GameRoom::~GameRoom() {}
@@ -71,10 +73,10 @@ void GameRoom::handlePlayerDisconnect(shared_ptr<Player> player)
         assignNewHost();
     }
 
-    // if (gameActive && gameState)
-    // {
-    //     gameState->removePlayer(player);
-    // }
+    if (gameActive && gameState)
+    {
+        gameState->removePlayer(player);
+    }
 }
 
 void GameRoom::broadcastMessage(const string &message, shared_ptr<Player> excludePlayer)
@@ -97,7 +99,7 @@ void GameRoom::handleGameAction(shared_ptr<Player> player, const string &command
     else if (command == "CARD_REVEAL")
     {
         string msg = gameState->playerFlipCard(player);
-        broadcastMessage(string("CARD_ID") + msg);
+        broadcastMessage(string("CARD_ID") + " " + msg);
     }
 }
 
