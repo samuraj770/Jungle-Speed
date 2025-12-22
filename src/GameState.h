@@ -45,10 +45,10 @@ struct Card
     CardShape shape;
 
     // porównanie kształtu kart
-    bool operator==(const Card &other) const
-    {
-        return shape == other.shape;
-    }
+    // bool operator==(const Card &other) const
+    // {
+    //     return shape == other.shape;
+    // }
 
     string toString() const;
 };

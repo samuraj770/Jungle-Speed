@@ -54,6 +54,35 @@ void GameState::nextTurn()
     currentTurnIndex = (currentTurnIndex + 1) % turnOrder.size();
 }
 
+bool GameState::checkForDuels()
+{
+    activeDuelists.clear();
+    duelActive = false;
+
+    map<CardShape, vector<shared_ptr<Player>>> shapeOwners;
+
+    for (auto player : turnOrder)
+    {
+        PlayerDeck &deck = playerDecks[player];
+        if (!deck.faceUp.empty())
+        {
+            Card topCard = deck.faceUp.back();
+            shapeOwners[topCard.shape].push_back(player);
+        }
+    }
+
+    for (auto const &[shape, owners] : shapeOwners)
+    {
+        if (owners.size() > 1)
+        {
+            activeDuelists = owners;
+            duelActive = true;
+        }
+    }
+
+    return duelActive;
+}
+
 GameState::GameState() {}
 
 GameState::~GameState() {}
