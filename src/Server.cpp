@@ -90,9 +90,10 @@ void Server::joinRoom(const string &roomName, shared_ptr<Player> player)
 
     string nicks = room->getPlayerNicks();
     string msg = string("ACCEPT_JOIN") + " " +
-                 to_string(room->isGameActive()) + " " +   // kod czy aktywny gra
-                 to_string(room->getPlayerCount()) + " " + // liczba aktywnych graczy @TODO
-                 to_string(room->getPlayerCount()) +       // liczba graczy w pokoju
+                 to_string(room->isGameActive()) + " " + // kod czy aktywny gra
+                 // to_string(room->getPlayerCount()) + " " + // liczba aktywnych graczy @TODO
+                 "0" + " " +
+                 to_string(room->getPlayerCount()) + // liczba graczy w pokoju
                  nicks;
     player->sendMessage(msg);
 }

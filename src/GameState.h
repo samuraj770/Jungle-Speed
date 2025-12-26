@@ -68,6 +68,7 @@ private:
 
     // lista graczy w kolejności tur
     vector<shared_ptr<Player>> turnOrder;
+
     // indeks gracza mającego obecnie turę
     size_t currentTurnIndex;
 
@@ -76,18 +77,25 @@ private:
 
     // zmienna przechowująca czy jest jakiś aktywny pojedynek
     bool duelActive;
+
     // wektor z graczami uczestniczącymi w pojedynku (może być ich więcej niż 2)
     vector<shared_ptr<Player>> activeDuelists;
 
     deque<Card> generateDeck();
+
     void shuffleDeck(deque<Card> &deck);
+
     void dealCards(deque<Card> &deck, const vector<shared_ptr<Player>> &targets);
+
     void collectFaceUpCards(const vector<shared_ptr<Player>> &targets);
+
     void nextTurn();
+
     bool checkForDuels();
 
 public:
     GameState();
+
     ~GameState();
 
     void initialize(const vector<shared_ptr<Player>> &players);
@@ -96,13 +104,13 @@ public:
 
     string playerGrabTotem(shared_ptr<Player> player);
 
-    bool isGameOver() const;
+    shared_ptr<Player> checkWinner() const;
 
-    shared_ptr<Player> getWinner() const;
-
-    string getFullState() const;
+    bool isStalemate() const;
 
     void removePlayer(shared_ptr<Player> player);
 
     string getPlayersDeckSizes() const;
+
+    int getPlayerDeckSize(shared_ptr<Player> player) const;
 };

@@ -18,9 +18,9 @@ void GameRoom::startGame(shared_ptr<Player> player)
     this->gameState = make_unique<GameState>();
     this->gameActive = true;
     gameState->initialize(players);
-    // broadcastMessage(string("ACCEPT_GAME_START") + " " + to_string(gameState->getPlayerDeckSize(player)));
-    broadcastMessage(string("ACCEPT_GAME_START"));
-    broadcastMessage(gameState->getPlayersDeckSizes());
+    broadcastMessage(string("ACCEPT_GAME_START") + " " + to_string(gameState->getPlayerDeckSize(player)));
+    // broadcastMessage(string("ACCEPT_GAME_START"));
+    // broadcastMessage(gameState->getPlayersDeckSizes());
 }
 
 void GameRoom::endGame()
@@ -104,9 +104,17 @@ void GameRoom::handleGameAction(shared_ptr<Player> player, const string &command
         string msg = gameState->playerFlipCard(player);
         broadcastMessage(string("CARD_ID") + " " + msg + " " + player->getNick());
     }
-    else if (command == "TOTEM_GRAB")
+    else if (command == "TOTEM")
     {
         string msg = gameState->playerGrabTotem(player);
+        if (msg == "TOTEM_WON")
+        {
+            player->sendMessage(msg + " " + player->getNick());
+        }
+        else
+        {
+            player->sendMessage(msg);
+        }
         broadcastMessage(gameState->getPlayersDeckSizes());
     }
     else

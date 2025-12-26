@@ -20,7 +20,7 @@ deque<Card> GameState::generateDeck()
     {
         for (int j = 0; j < shapeCount; j++)
         {
-            for (int k = 0; k < 1; k++)
+            for (int k = 0; k < 1; k++) // ZMIANA!!! k powinno być=2 zmieniono na potrzeby testów @TODO
             {
                 deck.push_back({static_cast<CardColor>(i), static_cast<CardShape>(j)});
             }
@@ -134,7 +134,7 @@ string GameState::playerFlipCard(shared_ptr<Player> player)
     if (duelActive)
     {
         cout << "Trwa pojedynek" << endl;
-        return "";
+        return "-1";
     }
 
     PlayerDeck &deck = playerDecks[player];
@@ -149,21 +149,21 @@ string GameState::playerFlipCard(shared_ptr<Player> player)
     deck.faceDown.pop_front();
     deck.faceUp.push_back(revealedCard);
 
-    // bool newDuel = checkForDuels();
-    // if (newDuel)
-    // {
-    //     cout << "Gracze w pojedynku" << endl;
-    //     for (auto duelist : activeDuelists)
-    //     {
-    //         cout << duelist->getNick() << endl;
-    //     }
-    // }
-    // else
-    // {
-    //     nextTurn();
-    // }
+    bool newDuel = checkForDuels();
+    if (newDuel)
+    {
+        cout << "Gracze w pojedynku" << endl;
+        for (auto duelist : activeDuelists)
+        {
+            cout << duelist->getNick() << endl;
+        }
+    }
+    else
+    {
+        nextTurn();
+    }
 
-    nextTurn();
+    // nextTurn();
     return revealedCard.toString();
 }
 
@@ -183,6 +183,7 @@ string GameState::playerGrabTotem(shared_ptr<Player> player)
 
         if (isDuelist)
         {
+            cout << player->getNick() << "Wygrał pojedynek" << endl;
             // przegrani pojedynku
             vector<shared_ptr<Player>> losers;
             for (auto p : activeDuelists)
@@ -206,7 +207,7 @@ string GameState::playerGrabTotem(shared_ptr<Player> player)
             dealCards(pot, {player});
             duelActive = false;
             activeDuelists.clear();
-            return "TOTEM_LOSS";
+            return "TOTEM_INVALID";
         }
     }
     else
@@ -271,6 +272,15 @@ string GameState::getPlayersDeckSizes() const
     }
 
     return ss.str();
+}
+
+int GameState::getPlayerDeckSize(shared_ptr<Player> player) const
+{
+    if (playerDecks.find(player) != playerDecks.end())
+    {
+        return playerDecks.at(player).faceDown.size();
+    }
+    return 0;
 }
 
 string Card::toString() const
