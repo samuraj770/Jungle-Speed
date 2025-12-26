@@ -104,7 +104,7 @@ public:
 
     string playerGrabTotem(shared_ptr<Player> player);
 
-    shared_ptr<Player> checkWinner() const;
+    vector<shared_ptr<Player>> checkWinners() const;
 
     bool isStalemate() const;
 
@@ -113,4 +113,6 @@ public:
     string getPlayersDeckSizes() const;
 
     int getPlayerDeckSize(shared_ptr<Player> player) const;
+
+    int getActivePlayersCount() const { return turnOrder.size(); }
 };

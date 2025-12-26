@@ -25,6 +25,8 @@ void GameRoom::startGame(shared_ptr<Player> player)
 
 void GameRoom::endGame()
 {
+    gameActive = false;
+    gameState.reset();
 }
 
 void GameRoom::assignNewHost()
@@ -33,6 +35,26 @@ void GameRoom::assignNewHost()
         return;
 
     this->host = players[0];
+}
+
+void GameRoom::checkResult()
+{
+    auto winners = gameState->checkWinners();
+
+    if (!winners.empty())
+    {
+        for (auto winner : winners)
+        {
+            broadcastMessage(string("GAME_FINISHED") + " " + winner->getNick());
+            gameState->removePlayer(winner);
+        }
+    }
+
+    if (gameState->getActivePlayersCount() < 2 || gameState->isStalemate())
+    {
+        broadcastMessage(string("GAME_OVER"));
+        endGame();
+    }
 }
 
 GameRoom::GameRoom(string name, shared_ptr<Player> host)
@@ -116,6 +138,8 @@ void GameRoom::handleGameAction(shared_ptr<Player> player, const string &command
             player->sendMessage(msg);
         }
         broadcastMessage(gameState->getPlayersDeckSizes());
+
+        checkResult();
     }
     else
     {

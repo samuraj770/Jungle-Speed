@@ -24,6 +24,8 @@ private:
 
     void assignNewHost();
 
+    void checkResult();
+
 public:
     GameRoom(string name, shared_ptr<Player> host);
 

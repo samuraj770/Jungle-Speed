@@ -220,6 +220,39 @@ string GameState::playerGrabTotem(shared_ptr<Player> player)
     }
 }
 
+vector<shared_ptr<Player>> GameState::checkWinners() const
+{
+    vector<shared_ptr<Player>> winners;
+    for (const auto &player : turnOrder)
+    {
+        if (playerDecks.find(player) == playerDecks.end())
+            continue;
+
+        const PlayerDeck &deck = playerDecks.at(player);
+        if (deck.faceDown.empty() && deck.faceUp.empty())
+        {
+            winners.push_back(player);
+        }
+    }
+    return winners;
+}
+
+bool GameState::isStalemate() const
+{
+    if (duelActive)
+        return false;
+
+    for (const auto &player : turnOrder)
+    {
+        if (playerDecks.find(player) != playerDecks.end())
+        {
+            if (playerDecks.at(player).faceDown.empty())
+                return false;
+        }
+    }
+    return true;
+}
+
 void GameState::removePlayer(shared_ptr<Player> player)
 {
     // usuwanie gracza z kolejki
