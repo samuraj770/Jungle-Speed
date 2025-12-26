@@ -1,5 +1,6 @@
 #include <random>
 #include <algorithm>
+#include <sstream>
 
 #include "Server.h"
 #include "Player.h"
@@ -239,7 +240,7 @@ void GameState::removePlayer(shared_ptr<Player> player)
         deque<Card> &faceDown = playerDecks[player].faceDown;
         pot.insert(pot.end(), faceDown.begin(), faceDown.end());
         playerDecks.erase(player);
-        dealCards(pot, turnOrder); // sprawdzić czy działa poprawnie oraz czy nie trzeba wysłać nowej liczby kart pozostałym graczom
+        dealCards(pot, turnOrder); // sprawdzić czy działa poprawnie
     }
 
     if (duelActive)
@@ -256,13 +257,20 @@ void GameState::removePlayer(shared_ptr<Player> player)
     }
 }
 
-int GameState::getPlayerDeckSize(shared_ptr<Player> player) const
+string GameState::getPlayersDeckSizes() const
 {
-    if (playerDecks.find(player) != playerDecks.end())
+    stringstream ss;
+    ss << "DECK_SIZE";
+
+    for (const auto &player : turnOrder)
     {
-        return playerDecks.at(player).faceDown.size();
+        if (playerDecks.find(player) != playerDecks.end())
+        {
+            ss << " " << player->getNick() << " " << playerDecks.at(player).faceDown.size();
+        }
     }
-    return 0;
+
+    return ss.str();
 }
 
 string Card::toString() const

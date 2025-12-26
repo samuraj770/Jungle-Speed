@@ -104,5 +104,5 @@ public:
 
     void removePlayer(shared_ptr<Player> player);
 
-    int getPlayerDeckSize(shared_ptr<Player> player) const;
+    string getPlayersDeckSizes() const;
 };
