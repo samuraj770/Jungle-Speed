@@ -91,7 +91,7 @@ void Server::joinRoom(const string &roomName, shared_ptr<Player> player)
     string nicks = room->getPlayerNicks();
     string msg = string("ACCEPT_JOIN") + " " +
                  to_string(room->isGameActive()) + " " +   // kod czy aktywny gra
-                 to_string(room->getPlayerCount()) + " " + // liczba aktywnych graczy @todo
+                 to_string(room->getPlayerCount()) + " " + // liczba aktywnych graczy @TODO
                  to_string(room->getPlayerCount()) +       // liczba graczy w pokoju
                  nicks;
     player->sendMessage(msg);
@@ -117,7 +117,7 @@ void Server::setUpNetwork()
 
     if (bind(server_fd, (sockaddr *)&serverSocket, sizeof(serverSocket)) == -1)
     {
-        perror("blad bind");
+        cerr << "BŁĄD: bind" << endl;
     }
 
     listen(server_fd, SOMAXCONN);
@@ -186,12 +186,31 @@ void Server::handleClientDisconnect(int client_fd)
     auto player_it = this->clients.find(client_fd); // find zwraca iterator
     auto player = player_it->second;
 
+    if (player_it == this->clients.end())
+    {
+        cout << "Gracz do usunięcia nie istnieje" << endl;
+        return;
+    }
+
     cout << "Klient rozłączyl sie fd: " << client_fd << endl;
 
-    player->quitRoom();
-    // powiadomienie pokoju o rozlaczeniu gracza
+    auto room = player->getRoom();
+
     // rozkminic czy wiadomosc quit room potrzebna bo wyjscie z gry = rozlaczenie
     // rozlaczenie przez read=0 oraz przez komende moze powodowac podwojna probe opuszczenia pokoju
+    player->quitRoom();
+
+    if (room)
+    {
+        if (room->getPlayerCount() == 0)
+        {
+            this->removeRoom(room->getName());
+        }
+    }
+    else
+    {
+        cout << "Pokój do usunięcia nie istnieje" << endl;
+    }
 
     epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, client_fd, nullptr);
 

@@ -19,7 +19,7 @@ deque<Card> GameState::generateDeck()
     {
         for (int j = 0; j < shapeCount; j++)
         {
-            for (int k = 0; k < 2; k++)
+            for (int k = 0; k < 1; k++)
             {
                 deck.push_back({static_cast<CardColor>(i), static_cast<CardShape>(j)});
             }
@@ -36,16 +36,36 @@ void GameState::shuffleDeck(deque<Card> &deck)
     shuffle(deck.begin(), deck.end(), generator);
 }
 
-void GameState::dealCards(deque<Card> &deck)
+void GameState::dealCards(deque<Card> &deck, const vector<shared_ptr<Player>> &targets)
 {
+    if (targets.empty())
+        return;
+
     size_t playerIndex = 0;
 
     while (!deck.empty())
     {
-        auto currentPlayer = turnOrder[playerIndex];
+        auto currentPlayer = targets[playerIndex];
         playerDecks[currentPlayer].faceDown.push_back(deck.front());
         deck.pop_front();
-        playerIndex = (playerIndex + 1) % turnOrder.size(); // liczba aktywnych graczy @todo
+        playerIndex = (playerIndex + 1) % targets.size(); // liczba aktywnych graczy @todo
+    }
+}
+
+void GameState::collectFaceUpCards(const vector<shared_ptr<Player>> &targets)
+{
+    for (const auto &player : targets)
+    {
+        if (playerDecks.find(player) == playerDecks.end())
+            continue;
+
+        deque<Card> &faceUpStack = playerDecks[player].faceUp;
+
+        if (faceUpStack.empty())
+            continue;
+
+        pot.insert(pot.end(), faceUpStack.begin(), faceUpStack.end());
+        faceUpStack.clear();
     }
 }
 
@@ -75,7 +95,7 @@ bool GameState::checkForDuels()
     {
         if (owners.size() > 1)
         {
-            activeDuelists = owners;
+            activeDuelists.insert(activeDuelists.end(), owners.begin(), owners.end());
             duelActive = true;
         }
     }
@@ -98,7 +118,7 @@ void GameState::initialize(const vector<shared_ptr<Player>> &players)
 
     deque<Card> fullDeck = generateDeck();
     shuffleDeck(fullDeck);
-    dealCards(fullDeck);
+    dealCards(fullDeck, players);
 }
 
 string GameState::playerFlipCard(shared_ptr<Player> player)
@@ -106,7 +126,7 @@ string GameState::playerFlipCard(shared_ptr<Player> player)
     if (player != turnOrder[currentTurnIndex])
     {
         cout << "Błąd kolejki" << endl;
-        return "";
+        return "-1";
     }
 
     // na potrzeby testów końcowo pojedynek nie może blokować tury
@@ -120,8 +140,8 @@ string GameState::playerFlipCard(shared_ptr<Player> player)
 
     if (deck.faceDown.empty())
     {
-        nextTurn();          // jeśli gracz nie ma kart na stosie zakrytych to pomijamy jego turę
-        return "CARD_ID -1"; // informujemy klienta o tym że gracz wykonał turę a nie ma kart
+        nextTurn(); // jeśli gracz nie ma kart na stosie zakrytych to pomijamy jego turę
+        return "#"; // informujemy klienta o tym że gracz wykonał turę a nie ma kart
     }
 
     Card revealedCard = deck.faceDown.front();
@@ -146,6 +166,58 @@ string GameState::playerFlipCard(shared_ptr<Player> player)
     return revealedCard.toString();
 }
 
+string GameState::playerGrabTotem(shared_ptr<Player> player)
+{
+    if (duelActive)
+    {
+        bool isDuelist = false;
+        for (auto p : activeDuelists)
+        {
+            if (p == player)
+            {
+                isDuelist = true;
+                break;
+            }
+        }
+
+        if (isDuelist)
+        {
+            // przegrani pojedynku
+            vector<shared_ptr<Player>> losers;
+            for (auto p : activeDuelists)
+            {
+                if (p != player)
+                {
+                    losers.push_back(p);
+                }
+            }
+
+            collectFaceUpCards(activeDuelists);
+            dealCards(pot, losers);
+
+            duelActive = false;
+            activeDuelists.clear();
+            return "TOTEM_WON";
+        }
+        else
+        {
+            collectFaceUpCards(turnOrder);
+            dealCards(pot, {player});
+            duelActive = false;
+            activeDuelists.clear();
+            return "TOTEM_LOSS";
+        }
+    }
+    else
+    {
+        collectFaceUpCards(turnOrder);
+        dealCards(pot, {player});
+        duelActive = false;
+        activeDuelists.clear();
+        return "TOTEM_INVALID";
+    }
+}
+
 void GameState::removePlayer(shared_ptr<Player> player)
 {
     // usuwanie gracza z kolejki
@@ -163,19 +235,11 @@ void GameState::removePlayer(shared_ptr<Player> player)
 
     if (playerDecks.count(player))
     {
-        PlayerDeck &deck = playerDecks[player];
-        while (!deck.faceDown.empty())
-        {
-            pot.push_back(deck.faceDown.front());
-            deck.faceDown.pop_front();
-        }
-        while (!deck.faceUp.empty())
-        {
-            pot.push_back(deck.faceUp.front());
-            deck.faceUp.pop_front();
-        }
+        collectFaceUpCards({player});
+        deque<Card> &faceDown = playerDecks[player].faceDown;
+        pot.insert(pot.end(), faceDown.begin(), faceDown.end());
         playerDecks.erase(player);
-        dealCards(pot); // sprawdzić czy działa poprawnie
+        dealCards(pot, turnOrder); // sprawdzić czy działa poprawnie oraz czy nie trzeba wysłać nowej liczby kart pozostałym graczom
     }
 
     if (duelActive)
@@ -192,7 +256,16 @@ void GameState::removePlayer(shared_ptr<Player> player)
     }
 }
 
+int GameState::getPlayerDeckSize(shared_ptr<Player> player) const
+{
+    if (playerDecks.find(player) != playerDecks.end())
+    {
+        return playerDecks.at(player).faceDown.size();
+    }
+    return 0;
+}
+
 string Card::toString() const
 {
-    return to_string((int)color) + " " + to_string((int)shape);
+    return to_string((int)color) + to_string((int)shape);
 }

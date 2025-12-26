@@ -18,7 +18,7 @@ void GameRoom::startGame(shared_ptr<Player> player)
     this->gameState = make_unique<GameState>();
     this->gameActive = true;
     gameState->initialize(players);
-    broadcastMessage(string("ACCEPT_GAME_START"));
+    broadcastMessage(string("ACCEPT_GAME_START") + " " + to_string(gameState->getPlayerDeckSize(player)));
 }
 
 void GameRoom::endGame()
@@ -99,7 +99,7 @@ void GameRoom::handleGameAction(shared_ptr<Player> player, const string &command
     else if (command == "CARD_REVEAL")
     {
         string msg = gameState->playerFlipCard(player);
-        broadcastMessage(string("CARD_ID") + " " + msg);
+        broadcastMessage(string("CARD_ID") + " " + msg + " " + player->getNick());
     }
 }
 

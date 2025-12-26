@@ -71,7 +71,7 @@ private:
     // indeks gracza mającego obecnie turę
     size_t currentTurnIndex;
 
-    // karty pod totemem ?
+    // pomocnicza zmienna służąca do agregacji kart z stołu do rozdania
     deque<Card> pot;
 
     // zmienna przechowująca czy jest jakiś aktywny pojedynek
@@ -81,7 +81,8 @@ private:
 
     deque<Card> generateDeck();
     void shuffleDeck(deque<Card> &deck);
-    void dealCards(deque<Card> &deck);
+    void dealCards(deque<Card> &deck, const vector<shared_ptr<Player>> &targets);
+    void collectFaceUpCards(const vector<shared_ptr<Player>> &targets);
     void nextTurn();
     bool checkForDuels();
 
@@ -102,4 +103,6 @@ public:
     string getFullState() const;
 
     void removePlayer(shared_ptr<Player> player);
+
+    int getPlayerDeckSize(shared_ptr<Player> player) const;
 };
