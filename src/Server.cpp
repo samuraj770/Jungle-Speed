@@ -79,12 +79,23 @@ void Server::joinRoom(const string &roomName, shared_ptr<Player> player)
     auto room_it = this->rooms.find(roomName);
     if (room_it == this->rooms.end())
     {
-        player->sendMessage("JOIN_ERR 0");
+        player->sendMessage("JOIN_ERR INVALID_CODE"); // @TODO: nie rozłącza gracza
+        // player->quitRoom();
+        handleClientDisconnect(player->getFd());
         return;
     }
 
     shared_ptr<GameRoom> room = room_it->second;
-    // tryb widza i pelny pokoj zrobic
+
+    if (room->getPlayerCount() >= 4)
+    {
+        player->sendMessage("JOIN_ERR ROOM_FULL");
+        handleClientDisconnect(player->getFd());
+        // player->quitRoom();
+        return;
+    }
+
+    // @TODO: tryb widza i unikalność nicku
 
     room->addPlayer(player);
 
@@ -156,7 +167,7 @@ void Server::handleClientData(int client_fd)
 {
     char buf[MAX_BUF];
 
-    auto player_it = this->clients.find(client_fd); // find zwraca iterator
+    auto player_it = this->clients.find(client_fd);
     auto player = player_it->second;
 
     int rmsg = read(client_fd, buf, MAX_BUF);
@@ -184,7 +195,7 @@ void Server::handleClientData(int client_fd)
 
 void Server::handleClientDisconnect(int client_fd)
 {
-    auto player_it = this->clients.find(client_fd); // find zwraca iterator
+    auto player_it = this->clients.find(client_fd);
     auto player = player_it->second;
 
     if (player_it == this->clients.end())

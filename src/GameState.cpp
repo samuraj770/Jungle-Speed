@@ -131,11 +131,11 @@ string GameState::playerFlipCard(shared_ptr<Player> player)
     }
 
     // na potrzeby testów końcowo pojedynek nie może blokować tury
-    if (duelActive)
-    {
-        cout << "Trwa pojedynek" << endl;
-        return "-1";
-    }
+    // if (duelActive)
+    // {
+    //     cout << "Trwa pojedynek" << endl;
+    //     return "-1";
+    // }
 
     PlayerDeck &deck = playerDecks[player];
 
@@ -157,6 +157,7 @@ string GameState::playerFlipCard(shared_ptr<Player> player)
         {
             cout << duelist->getNick() << endl;
         }
+        nextTurn();
     }
     else
     {
@@ -172,9 +173,9 @@ string GameState::playerGrabTotem(shared_ptr<Player> player)
     if (duelActive)
     {
         bool isDuelist = false;
-        for (auto p : activeDuelists)
+        for (auto activeDuelist : activeDuelists)
         {
-            if (p == player)
+            if (activeDuelist == player)
             {
                 isDuelist = true;
                 break;
@@ -246,7 +247,7 @@ bool GameState::isStalemate() const
     {
         if (playerDecks.find(player) != playerDecks.end())
         {
-            if (playerDecks.at(player).faceDown.empty())
+            if (!playerDecks.at(player).faceDown.empty())
                 return false;
         }
     }

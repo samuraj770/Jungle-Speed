@@ -86,7 +86,7 @@ void GameRoom::handlePlayerDisconnect(shared_ptr<Player> player)
     string msg = string("PLAYER_DISC") + " " + player->getNick();
     broadcastMessage(msg);
 
-    if (players.empty())
+    if (players.empty()) // przy jednym graczu zakończyć grę
     {
         gameActive = false;
         return;
@@ -123,15 +123,18 @@ void GameRoom::handleGameAction(shared_ptr<Player> player, const string &command
     }
     else if (command == "CARD_REVEAL")
     {
+        if (!gameActive) // @TODO: sprawdzić czy nie ma błędu pamięci
+            return;
         string msg = gameState->playerFlipCard(player);
         broadcastMessage(string("CARD_ID") + " " + msg + " " + player->getNick());
+        checkResult();
     }
     else if (command == "TOTEM")
     {
         string msg = gameState->playerGrabTotem(player);
         if (msg == "TOTEM_WON")
         {
-            player->sendMessage(msg + " " + player->getNick());
+            broadcastMessage(msg + " " + player->getNick());
         }
         else
         {
