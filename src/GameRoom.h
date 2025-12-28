@@ -39,7 +39,7 @@ public:
 
     void handleGameAction(shared_ptr<Player> player, const string &command);
 
-    string getPlayerNicks() const;
+    string getPlayerNicksString() const;
 
     bool isHost(shared_ptr<Player> player) const;
 

@@ -26,7 +26,7 @@ Server::Server(int port) : port(port)
     }
     catch (exception &e)
     {
-        cerr << "blad inicjalizacji serwera: " << e.what() << endl;
+        cerr << "BŁĄD: inicjalizacja serwera: " << e.what() << endl;
         throw;
     }
 }
@@ -79,8 +79,7 @@ void Server::joinRoom(const string &roomName, shared_ptr<Player> player)
     auto room_it = this->rooms.find(roomName);
     if (room_it == this->rooms.end())
     {
-        player->sendMessage("JOIN_ERR INVALID_CODE"); // @TODO: nie rozłącza gracza
-        // player->quitRoom();
+        player->sendMessage("JOIN_ERR INVALID_CODE");
         handleClientDisconnect(player->getFd());
         return;
     }
@@ -91,22 +90,12 @@ void Server::joinRoom(const string &roomName, shared_ptr<Player> player)
     {
         player->sendMessage("JOIN_ERR ROOM_FULL");
         handleClientDisconnect(player->getFd());
-        // player->quitRoom();
         return;
     }
 
     // @TODO: tryb widza i unikalność nicku
 
     room->addPlayer(player);
-
-    string nicks = room->getPlayerNicks();
-    string msg = string("ACCEPT_JOIN") + " " +
-                 to_string(room->isGameActive()) + " " + // kod czy aktywny gra
-                 // to_string(room->getPlayerCount()) + " " + // liczba aktywnych graczy @TODO
-                 "0" + " " +
-                 to_string(room->getPlayerCount()) + // liczba graczy w pokoju
-                 nicks;
-    player->sendMessage(msg);
 }
 
 void Server::removeRoom(const string &roomName)
@@ -216,7 +205,7 @@ void Server::handleClientDisconnect(int client_fd)
     {
         if (room->getPlayerCount() == 0)
         {
-            this->removeRoom(room->getName());
+            this->removeRoom(room->getName()); // @TODO: sprawdzić gdy podczas gry wszyscy nagle wyjdą
         }
     }
     else

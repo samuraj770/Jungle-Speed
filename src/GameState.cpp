@@ -320,6 +320,22 @@ int GameState::getPlayerDeckSize(shared_ptr<Player> player) const
     return 0;
 }
 
+string GameState::getPlayersFaceUpCards() const
+{
+    stringstream ss;
+    ss << "FACE_UP_CARDS";
+
+    for (const auto &player : turnOrder)
+    {
+        if (playerDecks.find(player) != playerDecks.end())
+        {
+            ss << " " << player->getNick() << " " << playerDecks.at(player).faceUp.back().toString();
+        }
+    }
+
+    return ss.str();
+}
+
 string Card::toString() const
 {
     return to_string((int)color) + to_string((int)shape);

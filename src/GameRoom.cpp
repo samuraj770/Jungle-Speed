@@ -15,12 +15,20 @@ void GameRoom::startGame(shared_ptr<Player> player)
         return;
     }
 
+    if (players.size() < 2)
+    {
+        return;
+    }
+
+    for (auto &player : players)
+    {
+        player->setSpectator(false);
+    }
+
     this->gameState = make_unique<GameState>();
     this->gameActive = true;
     gameState->initialize(players);
     broadcastMessage(string("ACCEPT_GAME_START") + " " + to_string(gameState->getPlayerDeckSize(player)));
-    // broadcastMessage(string("ACCEPT_GAME_START"));
-    // broadcastMessage(gameState->getPlayersDeckSizes());
 }
 
 void GameRoom::endGame()
@@ -66,7 +74,7 @@ GameRoom::GameRoom(string name, shared_ptr<Player> host)
 
 GameRoom::~GameRoom()
 {
-    cout << "zniszczono pokój: " << name << endl;
+    cout << "Zniszczono pokój: " << name << endl;
 }
 
 void GameRoom::addPlayer(shared_ptr<Player> newPlayer)
@@ -74,8 +82,29 @@ void GameRoom::addPlayer(shared_ptr<Player> newPlayer)
     players.push_back(newPlayer);
     newPlayer->setRoom(shared_from_this());
 
-    string msg = string("PLAYER_NEW") + " " + newPlayer->getNick();
-    broadcastMessage(msg, newPlayer);
+    if (this->gameActive) // @TODO: sprawdzić co się stanie gdy gracze wyjdą ale są osoby w trybie widza
+    {
+        newPlayer->setSpectator(true);
+
+        if (gameState)
+        {
+            newPlayer->sendMessage(gameState->getPlayersDeckSizes());
+            newPlayer->sendMessage(gameState->getPlayersFaceUpCards());
+        }
+    }
+    else
+    {
+        newPlayer->setSpectator(false);
+        string msg = string("PLAYER_NEW") + " " + newPlayer->getNick();
+        broadcastMessage(msg, newPlayer);
+    }
+
+    string msg = string("ACCEPT_JOIN") + " " +
+                 to_string(this->isGameActive()) + " " +               // kod czy aktywny gra
+                 to_string(gameState->getActivePlayersCount()) + " " + // liczba aktywnych graczy @TODO
+                 to_string(this->getPlayerCount()) +                   // liczba graczy w pokoju
+                 this->getPlayerNicksString();
+    newPlayer->sendMessage(msg);
 }
 
 void GameRoom::handlePlayerDisconnect(shared_ptr<Player> player)
@@ -89,9 +118,9 @@ void GameRoom::handlePlayerDisconnect(shared_ptr<Player> player)
     string msg = string("PLAYER_DISC") + " " + player->getNick();
     broadcastMessage(msg);
 
-    if (players.empty()) // przy jednym graczu zakończyć grę
+    if (players.size() < 2) //@TODO: przy jednym graczu zakończyć grę
     {
-        gameActive = false;
+        endGame();
         return;
     }
 
@@ -120,6 +149,11 @@ void GameRoom::broadcastMessage(const string &message, shared_ptr<Player> exclud
 
 void GameRoom::handleGameAction(shared_ptr<Player> player, const string &command)
 {
+    if (player->isSpectator())
+    {
+        return;
+    }
+
     if (command == "GAME_START")
     {
         startGame(player);
@@ -158,7 +192,7 @@ bool GameRoom::isHost(shared_ptr<Player> player) const
     return this->host == player;
 }
 
-string GameRoom::getPlayerNicks() const
+string GameRoom::getPlayerNicksString() const
 {
     string nicks;
     for (const auto &player : this->players)

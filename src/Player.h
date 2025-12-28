@@ -15,6 +15,7 @@ private:
     int fd;                         // deskryptor pliku gracza (klienta)
     string nick;                    // nazwa gracza
     weak_ptr<GameRoom> currentRoom; // wskazanie na pokoj w ktorym gracz sie znajduje
+    bool isSpectatorMode = false;   // czy jest w trybie widza
 
 public:
     string buf; // bufor do przechowywania wiadomosci
@@ -35,5 +36,10 @@ public:
     int getFd() const { return fd; }
 
     void setNick(const string &nick) { this->nick = nick; }
+
     string getNick() const { return nick; }
+
+    void setSpectator(bool state) { isSpectatorMode = state; }
+
+    bool isSpectator() const { return isSpectatorMode; }
 };

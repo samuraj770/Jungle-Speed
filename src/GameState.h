@@ -115,4 +115,6 @@ public:
     int getPlayerDeckSize(shared_ptr<Player> player) const;
 
     int getActivePlayersCount() const { return turnOrder.size(); }
+
+    string getPlayersFaceUpCards() const;
 };
