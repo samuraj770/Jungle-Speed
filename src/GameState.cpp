@@ -7,6 +7,8 @@
 #include "GameRoom.h"
 #include "GameState.h"
 
+#define TOLERANCE_TIME 500 // milisekundy
+
 using namespace std;
 
 deque<Card> GameState::generateDeck()
@@ -104,7 +106,10 @@ bool GameState::checkForDuels()
     return duelActive;
 }
 
-GameState::GameState() {}
+GameState::GameState()
+{
+    lastDuelEndTime = chrono::steady_clock::now() - chrono::hours(1);
+}
 
 GameState::~GameState()
 {
@@ -203,6 +208,9 @@ string GameState::playerGrabTotem(shared_ptr<Player> player)
 
             duelActive = false;
             activeDuelists.clear();
+
+            lastDuelEndTime = chrono::steady_clock::now();
+
             return "TOTEM_WON";
         }
         else
@@ -211,15 +219,25 @@ string GameState::playerGrabTotem(shared_ptr<Player> player)
             dealCards(pot, {player});
             duelActive = false;
             activeDuelists.clear();
+
+            lastDuelEndTime = chrono::steady_clock::now();
+
             return "TOTEM_INVALID";
         }
     }
     else
     {
+        auto now = chrono::steady_clock::now();
+        auto timeSinceDuel = chrono::duration_cast<chrono::milliseconds>(now - lastDuelEndTime).count();
+
+        if (timeSinceDuel < TOLERANCE_TIME)
+        {
+            return "TOTEM_LOST";
+        }
+
         collectFaceUpCards(turnOrder);
         dealCards(pot, {player});
-        duelActive = false;
-        activeDuelists.clear();
+
         return "TOTEM_INVALID";
     }
 }
@@ -329,7 +347,7 @@ string GameState::getPlayersFaceUpCards() const
     {
         if (playerDecks.find(player) != playerDecks.end())
         {
-            ss << " " << player->getNick() << " " << playerDecks.at(player).faceUp.back().toString();
+            ss << " " << player->getNick() << " " << playerDecks.at(player).faceUp.back().toString() << " " << playerDecks.at(player).faceUp.size();
         }
     }
 

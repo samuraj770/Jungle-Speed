@@ -163,7 +163,7 @@ void GameRoom::handleGameAction(shared_ptr<Player> player, const string &command
         if (!gameActive) // @TODO: sprawdzić czy nie ma błędu pamięci
             return;
         string msg = gameState->playerFlipCard(player);
-        broadcastMessage(string("CARD_ID") + " " + msg + " " + player->getNick());
+        broadcastMessage(string("CARD_ID") + " " + player->getNick() + " " + msg);
         checkResult();
     }
     else if (command == "TOTEM")

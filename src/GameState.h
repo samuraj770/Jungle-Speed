@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include <memory>
+#include <chrono>
 
 using namespace std;
 
@@ -80,6 +81,9 @@ private:
 
     // wektor z graczami uczestniczącymi w pojedynku (może być ich więcej niż 2)
     vector<shared_ptr<Player>> activeDuelists;
+
+    // czas zakończenia ostatniego pojedunku
+    chrono::steady_clock::time_point lastDuelEndTime;
 
     deque<Card> generateDeck();
 
