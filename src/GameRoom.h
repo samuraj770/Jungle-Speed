@@ -31,7 +31,7 @@ public:
 
     ~GameRoom();
 
-    void addPlayer(shared_ptr<Player> player);
+    bool addPlayer(shared_ptr<Player> player);
 
     void handlePlayerDisconnect(shared_ptr<Player> player);
 
@@ -48,4 +48,6 @@ public:
     bool isGameActive() const { return gameActive; }
 
     int getPlayerCount() const { return players.size(); }
+
+    bool isNickTaken(const string &nick) const;
 };

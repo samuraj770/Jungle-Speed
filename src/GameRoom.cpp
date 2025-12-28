@@ -77,8 +77,12 @@ GameRoom::~GameRoom()
     cout << "Zniszczono pokój: " << name << endl;
 }
 
-void GameRoom::addPlayer(shared_ptr<Player> newPlayer)
+bool GameRoom::addPlayer(shared_ptr<Player> newPlayer)
 {
+    if (isNickTaken(newPlayer->getNick()))
+    {
+        return false;
+    }
     players.push_back(newPlayer);
     newPlayer->setRoom(shared_from_this());
 
@@ -105,6 +109,8 @@ void GameRoom::addPlayer(shared_ptr<Player> newPlayer)
                  to_string(this->getPlayerCount()) +                   // liczba graczy w pokoju
                  this->getPlayerNicksString();
     newPlayer->sendMessage(msg);
+
+    return true;
 }
 
 void GameRoom::handlePlayerDisconnect(shared_ptr<Player> player)
@@ -190,6 +196,18 @@ void GameRoom::handleGameAction(shared_ptr<Player> player, const string &command
 bool GameRoom::isHost(shared_ptr<Player> player) const
 {
     return this->host == player;
+}
+
+bool GameRoom::isNickTaken(const string &nick) const
+{
+    for (const auto &player : players)
+    {
+        if (player->getNick() == nick)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 string GameRoom::getPlayerNicksString() const

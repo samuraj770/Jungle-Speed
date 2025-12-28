@@ -93,9 +93,12 @@ void Server::joinRoom(const string &roomName, shared_ptr<Player> player)
         return;
     }
 
-    // @TODO: tryb widza i unikalność nicku
-
-    room->addPlayer(player);
+    if (!room->addPlayer(player))
+    {
+        player->sendMessage("JOIN_ERR NICK_TAKEN");
+        handleClientDisconnect(player->getFd());
+        return;
+    }
 }
 
 void Server::removeRoom(const string &roomName)
