@@ -106,7 +106,10 @@ bool GameState::checkForDuels()
 
 GameState::GameState() {}
 
-GameState::~GameState() {}
+GameState::~GameState()
+{
+    cout << "Zniszczono stan gry" << endl;
+}
 
 void GameState::initialize(const vector<shared_ptr<Player>> &players)
 {
@@ -127,7 +130,7 @@ string GameState::playerFlipCard(shared_ptr<Player> player)
     if (player != turnOrder[currentTurnIndex])
     {
         cout << "Błąd kolejki" << endl;
-        return "-1";
+        return string("-1") + " " + turnOrder[currentTurnIndex]->getNick(); //@TODO: błąd zła kolejność argumentów
     }
 
     // na potrzeby testów końcowo pojedynek nie może blokować tury

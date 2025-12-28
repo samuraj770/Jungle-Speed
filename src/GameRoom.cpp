@@ -64,7 +64,10 @@ GameRoom::GameRoom(string name, shared_ptr<Player> host)
     this->gameActive = false;
 }
 
-GameRoom::~GameRoom() {}
+GameRoom::~GameRoom()
+{
+    cout << "zniszczono pokój: " << name << endl;
+}
 
 void GameRoom::addPlayer(shared_ptr<Player> newPlayer)
 {
@@ -138,7 +141,7 @@ void GameRoom::handleGameAction(shared_ptr<Player> player, const string &command
         }
         else
         {
-            player->sendMessage(msg);
+            broadcastMessage(msg + " " + player->getNick());
         }
         broadcastMessage(gameState->getPlayersDeckSizes());
 
@@ -146,7 +149,7 @@ void GameRoom::handleGameAction(shared_ptr<Player> player, const string &command
     }
     else
     {
-        cout << "BŁĄD: Niepoprawny komunikat" << endl;
+        cerr << "BŁĄD: Niepoprawny komunikat" << endl;
     }
 }
 
