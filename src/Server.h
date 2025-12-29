@@ -22,7 +22,6 @@ private:
     epoll_event event;
     epoll_event events[MAX_EVENTS];
 
-    // map<klucz, wartosc>
     map<int, shared_ptr<Player>> clients; // polaczeni klienci
 
     map<string, shared_ptr<GameRoom>> rooms; // aktywne pokoje

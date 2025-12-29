@@ -121,7 +121,7 @@ void Server::setUpNetwork()
 
     if (bind(server_fd, (sockaddr *)&serverSocket, sizeof(serverSocket)) == -1)
     {
-        cerr << "BŁĄD: bind" << endl;
+        cerr << "BŁĄD: bind." << endl;
     }
 
     listen(server_fd, SOMAXCONN);
@@ -160,6 +160,10 @@ void Server::handleClientData(int client_fd)
     char buf[MAX_BUF];
 
     auto player_it = this->clients.find(client_fd);
+    if (player_it == this->clients.end())
+    {
+        return;
+    }
     auto player = player_it->second;
 
     int rmsg = read(client_fd, buf, MAX_BUF);
@@ -217,9 +221,6 @@ void Server::handleClientDisconnect(int client_fd)
     }
 
     epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, client_fd, nullptr);
-
-    shutdown(client_fd, SHUT_RDWR);
-    close(client_fd);
 
     this->clients.erase(client_fd);
 }

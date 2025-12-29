@@ -11,7 +11,7 @@ void GameRoom::startGame(shared_ptr<Player> player)
 {
     if (!isHost(player))
     {
-        cout << "Gracz nie będący hostem nie może zacząć gry" << endl;
+        cerr << "BŁĄD: Gracz nie będący hostem nie może zacząć gry." << endl;
         return;
     }
 
@@ -72,10 +72,7 @@ GameRoom::GameRoom(string name, shared_ptr<Player> host)
     this->gameActive = false;
 }
 
-GameRoom::~GameRoom()
-{
-    cout << "Zniszczono pokój: " << name << endl;
-}
+GameRoom::~GameRoom() {}
 
 bool GameRoom::addPlayer(shared_ptr<Player> newPlayer)
 {
@@ -89,9 +86,17 @@ bool GameRoom::addPlayer(shared_ptr<Player> newPlayer)
     if (this->gameActive) // @TODO: sprawdzić co się stanie gdy gracze wyjdą ale są osoby w trybie widza
     {
         newPlayer->setSpectator(true);
+        string msg = string("PLAYER_NEW") + " " + newPlayer->getNick();
+        broadcastMessage(msg, newPlayer);
 
         if (gameState)
         {
+            string msg = string("ACCEPT_JOIN") + " " +
+                         to_string(this->isGameActive()) + " " +               // kod czy aktywny gra
+                         to_string(gameState->getActivePlayersCount()) + " " + // liczba aktywnych graczy @TODO
+                         to_string(this->getPlayerCount()) +                   // liczba graczy w pokoju
+                         this->getPlayerNicksString();
+            newPlayer->sendMessage(msg);
             newPlayer->sendMessage(gameState->getPlayersDeckSizes());
             newPlayer->sendMessage(gameState->getPlayersFaceUpCards());
         }
@@ -101,14 +106,17 @@ bool GameRoom::addPlayer(shared_ptr<Player> newPlayer)
         newPlayer->setSpectator(false);
         string msg = string("PLAYER_NEW") + " " + newPlayer->getNick();
         broadcastMessage(msg, newPlayer);
-    }
 
-    string msg = string("ACCEPT_JOIN") + " " +
-                 to_string(this->isGameActive()) + " " +               // kod czy aktywny gra
-                 to_string(gameState->getActivePlayersCount()) + " " + // liczba aktywnych graczy @TODO
-                 to_string(this->getPlayerCount()) +                   // liczba graczy w pokoju
-                 this->getPlayerNicksString();
-    newPlayer->sendMessage(msg);
+        if (newPlayer != host)
+        {
+            msg = string("ACCEPT_JOIN") + " " +
+                  to_string(this->isGameActive()) + " " + // kod czy aktywny gra
+                  "0" + " " +                             // liczba aktywnych graczy @TODO
+                  to_string(this->getPlayerCount()) +     // liczba graczy w pokoju
+                  this->getPlayerNicksString();
+            newPlayer->sendMessage(msg);
+        }
+    }
 
     return true;
 }
@@ -124,21 +132,33 @@ void GameRoom::handlePlayerDisconnect(shared_ptr<Player> player)
     string msg = string("PLAYER_DISC") + " " + player->getNick();
     broadcastMessage(msg);
 
-    if (players.size() < 2) //@TODO: przy jednym graczu zakończyć grę
-    {
-        endGame();
-        return;
-    }
-
     if (player == this->host)
     {
         assignNewHost();
     }
 
+    if (players.size() < 2)
+    {
+        if (gameActive)
+        {
+            broadcastMessage(string("GAME_OVER"));
+            endGame();
+            return;
+        }
+    }
+
     if (gameActive && gameState)
     {
         gameState->removePlayer(player);
-        broadcastMessage(gameState->getPlayersDeckSizes());
+        if (gameState->getActivePlayersCount() < 2)
+        {
+            broadcastMessage("GAME_OVER");
+            endGame();
+        }
+        else
+        {
+            broadcastMessage(gameState->getPlayersDeckSizes());
+        }
     }
 }
 
@@ -166,7 +186,7 @@ void GameRoom::handleGameAction(shared_ptr<Player> player, const string &command
     }
     else if (command == "CARD_REVEAL")
     {
-        if (!gameActive) // @TODO: sprawdzić czy nie ma błędu pamięci
+        if (!gameState)
             return;
         string msg = gameState->playerFlipCard(player);
         broadcastMessage(string("CARD_ID") + " " + player->getNick() + " " + msg);
@@ -189,7 +209,7 @@ void GameRoom::handleGameAction(shared_ptr<Player> player, const string &command
     }
     else
     {
-        cerr << "BŁĄD: Niepoprawny komunikat" << endl;
+        cerr << "BŁĄD: Niepoprawny komunikat." << endl;
     }
 }
 
@@ -200,6 +220,9 @@ bool GameRoom::isHost(shared_ptr<Player> player) const
 
 bool GameRoom::isNickTaken(const string &nick) const
 {
+    if (this->players.empty())
+        return false;
+
     for (const auto &player : players)
     {
         if (player->getNick() == nick)

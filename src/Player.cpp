@@ -11,6 +11,7 @@ Player::Player(int client_fd) : fd(client_fd) {}
 
 Player::~Player()
 {
+    shutdown(fd, SHUT_RDWR);
     close(fd);
 }
 
@@ -32,10 +33,6 @@ void Player::processMessage(const string &message, Server *server)
         cout << "Nick gracza: " << this->nick << endl;
         server->joinRoom(roomName, shared_from_this());
     }
-    // else if (command == "QUIT_ROOM")
-    // {
-    //    quitRoom();
-    // }
     else
     {
         auto room = getRoom();

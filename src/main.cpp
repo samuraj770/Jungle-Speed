@@ -19,7 +19,7 @@ int main()
     }
     catch (const exception &e)
     {
-        cerr << "Blad tworzenia serwera" << e.what() << endl;
+        cerr << "BŁĄD: Tworzenie serwera" << e.what() << endl;
         return 1;
     }
 

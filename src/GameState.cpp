@@ -51,7 +51,7 @@ void GameState::dealCards(deque<Card> &deck, const vector<shared_ptr<Player>> &t
         auto currentPlayer = targets[playerIndex];
         playerDecks[currentPlayer].faceDown.push_back(deck.front());
         deck.pop_front();
-        playerIndex = (playerIndex + 1) % targets.size(); // liczba aktywnych graczy @todo
+        playerIndex = (playerIndex + 1) % targets.size();
     }
 }
 
@@ -111,10 +111,7 @@ GameState::GameState()
     lastDuelEndTime = chrono::steady_clock::now() - chrono::hours(1);
 }
 
-GameState::~GameState()
-{
-    cout << "Zniszczono stan gry" << endl;
-}
+GameState::~GameState() {}
 
 void GameState::initialize(const vector<shared_ptr<Player>> &players)
 {
@@ -127,7 +124,7 @@ void GameState::initialize(const vector<shared_ptr<Player>> &players)
 
     deque<Card> fullDeck = generateDeck();
     shuffleDeck(fullDeck);
-    dealCards(fullDeck, players);
+    dealCards(fullDeck, turnOrder);
 }
 
 string GameState::playerFlipCard(shared_ptr<Player> player)
@@ -135,7 +132,7 @@ string GameState::playerFlipCard(shared_ptr<Player> player)
     if (player != turnOrder[currentTurnIndex])
     {
         cout << "Błąd kolejki" << endl;
-        return string("-1") + " " + turnOrder[currentTurnIndex]->getNick(); //@TODO: błąd zła kolejność argumentów
+        return string("-1") + " " + turnOrder[currentTurnIndex]->getNick();
     }
 
     // na potrzeby testów końcowo pojedynek nie może blokować tury
@@ -278,13 +275,20 @@ bool GameState::isStalemate() const
 void GameState::removePlayer(shared_ptr<Player> player)
 {
     // usuwanie gracza z kolejki
-    auto it = remove(turnOrder.begin(), turnOrder.end(), player);
+    auto it = find(turnOrder.begin(), turnOrder.end(), player);
+
+    // naprawianie tury
     if (it != turnOrder.end())
     {
-        turnOrder.erase(it, turnOrder.end());
+        auto indexToRemove = static_cast<size_t>(distance(turnOrder.begin(), it));
+
+        if (indexToRemove < currentTurnIndex)
+        {
+            currentTurnIndex--;
+        }
+        turnOrder.erase(it);
     }
 
-    // naprawianie indeksu
     if (currentTurnIndex >= turnOrder.size())
     {
         currentTurnIndex = 0;
@@ -296,7 +300,7 @@ void GameState::removePlayer(shared_ptr<Player> player)
         deque<Card> &faceDown = playerDecks[player].faceDown;
         pot.insert(pot.end(), faceDown.begin(), faceDown.end());
         playerDecks.erase(player);
-        dealCards(pot, turnOrder); // sprawdzić czy działa poprawnie
+        dealCards(pot, turnOrder);
     }
 
     if (duelActive)
@@ -347,10 +351,12 @@ string GameState::getPlayersFaceUpCards() const
     {
         if (playerDecks.find(player) != playerDecks.end())
         {
-            ss << " " << player->getNick() << " " << playerDecks.at(player).faceUp.back().toString() << " " << playerDecks.at(player).faceUp.size();
+            const auto &deck = playerDecks.at(player);
+            string topCard = deck.faceUp.empty() ? "0" : deck.faceUp.back().toString();
+
+            ss << " " << player->getNick() << " " << topCard << " " << deck.faceUp.size();
         }
     }
-
     return ss.str();
 }
 
