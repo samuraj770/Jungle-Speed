@@ -133,27 +133,32 @@ void GameRoom::handlePlayerDisconnect(shared_ptr<Player> player)
         players.erase(it, players.end());
     }
 
-    string msg = string("PLAYER_DISC") + " " + player->getNick();
-    broadcastMessage(msg);
-
     if (player == this->host)
     {
         assignNewHost();
     }
 
-    if (players.size() < 2)
+    if (players.empty())
     {
-        if (gameActive)
-        {
-            broadcastMessage(string("GAME_OVER"));
-            endGame();
-            return;
-        }
+        gameActive = false;
+        return;
     }
+
+    string msg = string("PLAYER_DISC") + " " + player->getNick();
 
     if (gameActive && gameState)
     {
         gameState->removePlayer(player);
+
+        auto currentPlayer = gameState->getCurrentPlayer();
+
+        if (currentPlayer)
+        {
+            msg += " " + currentPlayer->getNick();
+        }
+
+        broadcastMessage(msg);
+
         if (gameState->getActivePlayersCount() < 2)
         {
             broadcastMessage("GAME_OVER");
@@ -163,6 +168,10 @@ void GameRoom::handlePlayerDisconnect(shared_ptr<Player> player)
         {
             broadcastMessage(gameState->getPlayersDeckSizes());
         }
+    }
+    else
+    {
+        broadcastMessage(msg);
     }
 }
 

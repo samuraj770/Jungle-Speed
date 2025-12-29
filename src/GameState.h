@@ -121,4 +121,6 @@ public:
     int getActivePlayersCount() const { return turnOrder.size(); }
 
     string getPlayersFaceUpCards() const;
+
+    shared_ptr<Player> getCurrentPlayer() const;
 };

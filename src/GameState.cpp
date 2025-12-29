@@ -360,6 +360,21 @@ string GameState::getPlayersFaceUpCards() const
     return ss.str();
 }
 
+shared_ptr<Player> GameState::getCurrentPlayer() const
+{
+    if (turnOrder.empty())
+    {
+        return nullptr;
+    }
+
+    if (currentTurnIndex >= turnOrder.size())
+    {
+        return turnOrder[0];
+    }
+
+    return turnOrder[currentTurnIndex];
+}
+
 string Card::toString() const
 {
     return to_string((int)color) + to_string((int)shape);
