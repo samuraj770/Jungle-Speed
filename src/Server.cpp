@@ -9,7 +9,7 @@
 #include "Utils.h"
 #include "GameRoom.h"
 
-#define MAX_BUF 256
+#define MAX_BUF 4096
 
 using namespace std;
 
@@ -24,7 +24,7 @@ Server::Server(int port) : port(port)
     {
         setUpNetwork();
     }
-    catch (exception &e)
+    catch (const exception &e)
     {
         cerr << "BŁĄD: inicjalizacja serwera: " << e.what() << endl;
         throw;
@@ -51,7 +51,15 @@ void Server::run()
             }
             else
             {
-                handleClientData(events[i].data.fd);
+                try
+                {
+                    handleClientData(events[i].data.fd);
+                }
+                catch (const exception &e)
+                {
+                    cerr << "BŁĄD: Przetwarzanie danych" << e.what() << endl;
+                    handleClientDisconnect(events[i].data.fd);
+                }
             }
         }
     }
@@ -121,7 +129,7 @@ void Server::setUpNetwork()
 
     if (bind(server_fd, (sockaddr *)&serverSocket, sizeof(serverSocket)) == -1)
     {
-        cerr << "BŁĄD: bind." << endl;
+        throw runtime_error("BŁĄD: bind (port zajęty)");
     }
 
     listen(server_fd, SOMAXCONN);
@@ -166,10 +174,19 @@ void Server::handleClientData(int client_fd)
     }
     auto player = player_it->second;
 
+    const size_t MAX_PLAYER_BUFFER = 8096;
+
     int rmsg = read(client_fd, buf, MAX_BUF);
 
     if (rmsg > 0)
     {
+        if (player->buf.size() + rmsg > MAX_PLAYER_BUFFER)
+        {
+            cerr << "BŁĄD: Przekrocznie limitu bufora przez gracza" << endl;
+            handleClientDisconnect(client_fd);
+            return;
+        }
+
         player->buf.append(buf, rmsg);
 
         size_t delimiterPos;
@@ -183,16 +200,22 @@ void Server::handleClientData(int client_fd)
             player->buf.erase(0, delimiterPos + 1);
         }
     }
-    else
+    else if (rmsg == 0)
     {
         handleClientDisconnect(client_fd);
+    }
+    else
+    {
+        if (errno != EAGAIN && errno != EWOULDBLOCK)
+        {
+            handleClientDisconnect(client_fd);
+        }
     }
 }
 
 void Server::handleClientDisconnect(int client_fd)
 {
     auto player_it = this->clients.find(client_fd);
-    auto player = player_it->second;
 
     if (player_it == this->clients.end())
     {
@@ -200,12 +223,12 @@ void Server::handleClientDisconnect(int client_fd)
         return;
     }
 
+    auto player = player_it->second;
+
     cout << "Klient rozłączyl sie fd: " << client_fd << endl;
 
     auto room = player->getRoom();
 
-    // rozkminic czy wiadomosc quit room potrzebna bo wyjscie z gry = rozlaczenie
-    // rozlaczenie przez read=0 oraz przez komende moze powodowac podwojna probe opuszczenia pokoju
     player->quitRoom();
 
     if (room)

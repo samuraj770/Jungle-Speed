@@ -72,7 +72,11 @@ GameRoom::GameRoom(string name, shared_ptr<Player> host)
     this->gameActive = false;
 }
 
-GameRoom::~GameRoom() {}
+GameRoom::~GameRoom()
+{
+    gameState.reset();
+    players.clear();
+}
 
 bool GameRoom::addPlayer(shared_ptr<Player> newPlayer)
 {
