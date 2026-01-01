@@ -43,6 +43,10 @@ void GameRoom::assignNewHost()
         return;
 
     this->host = players[0];
+    if (host->isSpectator())
+    {
+        host->setSpectator(false);
+    }
 }
 
 void GameRoom::checkResult()
@@ -87,7 +91,7 @@ bool GameRoom::addPlayer(shared_ptr<Player> newPlayer)
     players.push_back(newPlayer);
     newPlayer->setRoom(shared_from_this());
 
-    if (this->gameActive) // @TODO: sprawdzić co się stanie gdy gracze wyjdą ale są osoby w trybie widza
+    if (this->gameActive)
     {
         newPlayer->setSpectator(true);
         string msg = string("PLAYER_NEW") + " " + newPlayer->getNick();
@@ -200,23 +204,29 @@ void GameRoom::handleGameAction(shared_ptr<Player> player, const string &command
     else if (command == "CARD_REVEAL")
     {
         if (!gameState)
+        {
             return;
+        }
         string msg = gameState->playerFlipCard(player);
         broadcastMessage(string("CARD_ID") + " " + player->getNick() + " " + msg);
         checkResult();
     }
     else if (command == "TOTEM")
     {
+        if (!gameState)
+        {
+            return;
+        }
         string msg = gameState->playerGrabTotem(player);
         if (msg == "TOTEM_WON")
         {
-            broadcastMessage(msg + " " + player->getNick());
+            broadcastMessage(msg + " " + player->getNick() + " " + gameState->getCurrentPlayer()->getNick());
         }
         else
         {
-            broadcastMessage(msg + " " + player->getNick());
+            broadcastMessage(msg + " " + player->getNick() + " " + gameState->getCurrentPlayer()->getNick());
         }
-        broadcastMessage(gameState->getPlayersDeckSizes());
+        broadcastMessage(gameState->getPlayersDeckSizes() + " " + "DUEL");
 
         checkResult();
     }

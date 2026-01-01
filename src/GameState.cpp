@@ -7,7 +7,7 @@
 #include "GameRoom.h"
 #include "GameState.h"
 
-#define TOLERANCE_TIME 500 // milisekundy
+#define TOLERANCE_TIME 700 // milisekundy
 
 using namespace std;
 
@@ -22,7 +22,7 @@ deque<Card> GameState::generateDeck()
     {
         for (int j = 0; j < shapeCount; j++)
         {
-            for (int k = 0; k < 1; k++) // ZMIANA!!! k powinno być=2 zmieniono na potrzeby testów @TODO
+            for (int k = 0; k < 2; k++) // ZMIANA!!! k powinno być=2 zmieniono na potrzeby testów @TODO
             {
                 deck.push_back({static_cast<CardColor>(i), static_cast<CardShape>(j)});
             }
@@ -131,16 +131,9 @@ string GameState::playerFlipCard(shared_ptr<Player> player)
 {
     if (player != turnOrder[currentTurnIndex])
     {
-        cout << "Błąd kolejki" << endl;
+        cerr << "BŁĄD: kolejność tur" << endl;
         return string("-1") + " " + turnOrder[currentTurnIndex]->getNick();
     }
-
-    // na potrzeby testów końcowo pojedynek nie może blokować tury
-    // if (duelActive)
-    // {
-    //     cout << "Trwa pojedynek" << endl;
-    //     return "-1";
-    // }
 
     PlayerDeck &deck = playerDecks[player];
 
@@ -157,7 +150,7 @@ string GameState::playerFlipCard(shared_ptr<Player> player)
     bool newDuel = checkForDuels();
     if (newDuel)
     {
-        cout << "Gracze w pojedynku" << endl;
+        // cout << "Gracze w pojedynku" << endl;
         for (auto duelist : activeDuelists)
         {
             cout << duelist->getNick() << endl;
@@ -169,7 +162,6 @@ string GameState::playerFlipCard(shared_ptr<Player> player)
         nextTurn();
     }
 
-    // nextTurn();
     return revealedCard.toString();
 }
 
@@ -189,8 +181,9 @@ string GameState::playerGrabTotem(shared_ptr<Player> player)
 
         if (isDuelist)
         {
-            cout << player->getNick() << "Wygrał pojedynek" << endl;
-            // przegrani pojedynku
+            // cout << "Gracz wygrał " << player->getNick() << " pojedynek" << endl;
+
+            //  przegrani pojedynku
             vector<shared_ptr<Player>> losers;
             for (auto p : activeDuelists)
             {

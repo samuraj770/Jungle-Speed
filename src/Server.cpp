@@ -219,7 +219,6 @@ void Server::handleClientDisconnect(int client_fd)
 
     if (player_it == this->clients.end())
     {
-        cout << "Gracz do usunięcia nie istnieje" << endl;
         return;
     }
 
@@ -235,12 +234,8 @@ void Server::handleClientDisconnect(int client_fd)
     {
         if (room->getPlayerCount() == 0)
         {
-            this->removeRoom(room->getName()); // @TODO: sprawdzić gdy podczas gry wszyscy nagle wyjdą
+            this->removeRoom(room->getName());
         }
-    }
-    else
-    {
-        cout << "Pokój do usunięcia nie istnieje" << endl;
     }
 
     epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, client_fd, nullptr);
