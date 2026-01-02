@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <vector>
+#include <csignal>
 
 #include "Server.h"
 #include "Player.h"
@@ -13,9 +14,16 @@
 
 using namespace std;
 
+volatile sig_atomic_t serverRunning = 1;
+
 void setNonBlocking(int sockfd)
 {
     fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFL, 0) | O_NONBLOCK);
+}
+
+void handleSignal(int)
+{
+    serverRunning = 0;
 }
 
 Server::Server(int port) : port(port)
@@ -33,16 +41,43 @@ Server::Server(int port) : port(port)
 
 Server::~Server()
 {
-    epoll_ctl(epoll_fd, EPOLL_CTL_DEL, server_fd, nullptr);
-    close(server_fd);
-    close(epoll_fd);
+    clients.clear();
+    rooms.clear();
+
+    if (epoll_fd != -1)
+    {
+        epoll_ctl(epoll_fd, EPOLL_CTL_DEL, server_fd, nullptr);
+        close(epoll_fd);
+    }
+
+    if (server_fd != -1)
+    {
+        close(server_fd);
+    }
+    cout << "Serwer zamknięty poprawnie." << endl;
 }
 
 void Server::run()
 {
-    while (true)
+    signal(SIGINT, handleSignal);
+
+    while (serverRunning)
     {
         int ready = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
+
+        if (ready == -1)
+        {
+            if (errno == EINTR)
+            {
+                continue;
+            }
+            else
+            {
+                cerr << "BŁĄD: epoll_wait" << endl;
+                break;
+            }
+        }
+
         for (int i = 0; i < ready; i++)
         {
             if (events[i].data.fd == server_fd)
@@ -118,6 +153,11 @@ void Server::removeRoom(const string &roomName)
 void Server::setUpNetwork()
 {
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (server_fd == -1)
+    {
+        throw runtime_error("BŁĄD: socket");
+    }
 
     int t = 1;
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &t, sizeof(t));

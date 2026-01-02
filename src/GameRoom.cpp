@@ -59,6 +59,8 @@ void GameRoom::checkResult()
         {
             broadcastMessage(string("GAME_FINISHED") + " " + winner->getNick());
             gameState->removePlayer(winner);
+            // broadcastMessage(string("GAME_OVER"));
+            // endGame();
         }
     }
 
