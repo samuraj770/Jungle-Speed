@@ -4,21 +4,19 @@
 #include <vector>
 #include <string>
 
-using namespace std;
-
 class Player;
 class GameState;
 
-class GameRoom : public enable_shared_from_this<GameRoom>
+class GameRoom : public std::enable_shared_from_this<GameRoom>
 {
 private:
-    string name;                        // kod pokoju
-    vector<shared_ptr<Player>> players; // przechowuje liste graczy w pokoju
-    shared_ptr<Player> host;            // wskaznik na hosta
-    bool gameActive;                    // czy gra jest aktywna
-    unique_ptr<GameState> gameState;    // stan gry
+    std::string name;                             // kod pokoju
+    std::vector<std::shared_ptr<Player>> players; // przechowuje liste graczy w pokoju
+    std::shared_ptr<Player> host;                 // wskaznik na hosta
+    bool gameActive;                              // czy gra jest aktywna
+    std::unique_ptr<GameState> gameState;         // stan gry
 
-    void startGame(shared_ptr<Player> player);
+    void startGame(std::shared_ptr<Player> player);
 
     void endGame();
 
@@ -27,27 +25,27 @@ private:
     void checkResult();
 
 public:
-    GameRoom(string name, shared_ptr<Player> host);
+    GameRoom(std::string name, std::shared_ptr<Player> host);
 
     ~GameRoom();
 
-    bool addPlayer(shared_ptr<Player> player);
+    bool addPlayer(std::shared_ptr<Player> player);
 
-    void handlePlayerDisconnect(shared_ptr<Player> player);
+    void handlePlayerDisconnect(std::shared_ptr<Player> player);
 
-    void broadcastMessage(const string &message, shared_ptr<Player> excludePlayer = nullptr);
+    void broadcastMessage(const std::string &message, std::shared_ptr<Player> excludePlayer = nullptr);
 
-    void handleGameAction(shared_ptr<Player> player, const string &command);
+    void handleGameAction(std::shared_ptr<Player> player, const std::string &command);
 
-    string getPlayerNicksString() const;
+    std::string getPlayerNicksString() const;
 
-    bool isHost(shared_ptr<Player> player) const;
+    bool isHost(std::shared_ptr<Player> player) const;
 
-    string getName() const { return name; }
+    std::string getName() const { return name; }
 
     bool isGameActive() const { return gameActive; }
 
     int getPlayerCount() const { return players.size(); }
 
-    bool isNickTaken(const string &nick) const;
+    bool isNickTaken(const std::string &nick) const;
 };

@@ -22,7 +22,7 @@ deque<Card> GameState::generateDeck()
     {
         for (int j = 0; j < shapeCount; j++)
         {
-            for (int k = 0; k < 2; k++) // ZMIANA!!! k powinno być=2 zmieniono na potrzeby testów @TODO
+            for (int k = 0; k < 2; k++)
             {
                 deck.push_back({static_cast<CardColor>(i), static_cast<CardShape>(j)});
             }

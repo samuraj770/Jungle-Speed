@@ -1,6 +1,4 @@
 #pragma once
 #include <string>
 
-using namespace std;
-
-string generateRoomCode();
+std::string generateRoomCode();

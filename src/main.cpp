@@ -13,7 +13,7 @@ int main()
 
     try
     {
-        gameServer = make_unique<Server>(PORT); // wywolanie konstruktora
+        gameServer = make_unique<Server>(PORT);
 
         gameServer->run();
     }

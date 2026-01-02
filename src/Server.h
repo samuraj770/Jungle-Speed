@@ -8,23 +8,21 @@
 
 #define MAX_EVENTS 64
 
-using namespace std;
-
 class Player;
 class GameRoom;
 
 class Server
 {
 private:
-    int port;      // port na ktorym nasluchuje serwer
+    int port;      // port na ktorym nasłuchuje serwer
     int server_fd; // deskryptor serwera
     int epoll_fd;  // deskryptor mechanizmu epoll
     epoll_event event;
     epoll_event events[MAX_EVENTS];
 
-    map<int, shared_ptr<Player>> clients; // polaczeni klienci
+    std::map<int, std::shared_ptr<Player>> clients; // połączeni klienci
 
-    map<string, shared_ptr<GameRoom>> rooms; // aktywne pokoje
+    std::map<std::string, std::shared_ptr<GameRoom>> rooms; // aktywne pokoje
 
     void setUpNetwork();
 
@@ -36,13 +34,14 @@ private:
 
 public:
     Server(int port); // Konstruktor
-    ~Server();        // Destruktor
+
+    ~Server(); // Destruktor
 
     void run();
 
-    void createRoom(shared_ptr<Player> host);
+    void createRoom(std::shared_ptr<Player> host);
 
-    void joinRoom(const string &roomName, shared_ptr<Player> player);
+    void joinRoom(const std::string &roomName, std::shared_ptr<Player> player);
 
-    void removeRoom(const string &roomName);
+    void removeRoom(const std::string &roomName);
 };

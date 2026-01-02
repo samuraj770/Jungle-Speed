@@ -7,8 +7,6 @@
 #include <memory>
 #include <chrono>
 
-using namespace std;
-
 class Player;
 
 // kolory kart
@@ -45,13 +43,7 @@ struct Card
     CardColor color;
     CardShape shape;
 
-    // porównanie kształtu kart
-    // bool operator==(const Card &other) const
-    // {
-    //     return shape == other.shape;
-    // }
-
-    string toString() const;
+    std::string toString() const;
 };
 
 class GameState
@@ -60,38 +52,38 @@ private:
     // talia gracza
     struct PlayerDeck
     {
-        deque<Card> faceDown; // stos kart zakrytych
-        deque<Card> faceUp;   // stos kart odkrytych
+        std::deque<Card> faceDown; // stos kart zakrytych
+        std::deque<Card> faceUp;   // stos kart odkrytych
     };
 
     // przypisanie talii do graczy
-    map<shared_ptr<Player>, PlayerDeck> playerDecks;
+    std::map<std::shared_ptr<Player>, PlayerDeck> playerDecks;
 
     // lista graczy w kolejności tur
-    vector<shared_ptr<Player>> turnOrder;
+    std::vector<std::shared_ptr<Player>> turnOrder;
 
     // indeks gracza mającego obecnie turę
     size_t currentTurnIndex;
 
     // pomocnicza zmienna służąca do agregacji kart z stołu do rozdania
-    deque<Card> pot;
+    std::deque<Card> pot;
 
     // zmienna przechowująca czy jest jakiś aktywny pojedynek
     bool duelActive;
 
     // wektor z graczami uczestniczącymi w pojedynku (może być ich więcej niż 2)
-    vector<shared_ptr<Player>> activeDuelists;
+    std::vector<std::shared_ptr<Player>> activeDuelists;
 
     // czas zakończenia ostatniego pojedunku
-    chrono::steady_clock::time_point lastDuelEndTime;
+    std::chrono::steady_clock::time_point lastDuelEndTime;
 
-    deque<Card> generateDeck();
+    std::deque<Card> generateDeck();
 
-    void shuffleDeck(deque<Card> &deck);
+    void shuffleDeck(std::deque<Card> &deck);
 
-    void dealCards(deque<Card> &deck, const vector<shared_ptr<Player>> &targets);
+    void dealCards(std::deque<Card> &deck, const std::vector<std::shared_ptr<Player>> &targets);
 
-    void collectFaceUpCards(const vector<shared_ptr<Player>> &targets);
+    void collectFaceUpCards(const std::vector<std::shared_ptr<Player>> &targets);
 
     void nextTurn();
 
@@ -102,25 +94,25 @@ public:
 
     ~GameState();
 
-    void initialize(const vector<shared_ptr<Player>> &players);
+    void initialize(const std::vector<std::shared_ptr<Player>> &players);
 
-    string playerFlipCard(shared_ptr<Player> player); // zwraca id wyłożonej karty
+    std::string playerFlipCard(std::shared_ptr<Player> player);
 
-    string playerGrabTotem(shared_ptr<Player> player);
+    std::string playerGrabTotem(std::shared_ptr<Player> player);
 
-    vector<shared_ptr<Player>> checkWinners() const;
+    std::vector<std::shared_ptr<Player>> checkWinners() const;
 
     bool isStalemate() const;
 
-    void removePlayer(shared_ptr<Player> player);
+    void removePlayer(std::shared_ptr<Player> player);
 
-    string getPlayersDeckSizes() const;
+    std::string getPlayersDeckSizes() const;
 
-    int getPlayerDeckSize(shared_ptr<Player> player) const;
+    int getPlayerDeckSize(std::shared_ptr<Player> player) const;
 
     int getActivePlayersCount() const { return turnOrder.size(); }
 
-    string getPlayersFaceUpCards() const;
+    std::string getPlayersFaceUpCards() const;
 
-    shared_ptr<Player> getCurrentPlayer() const;
+    std::shared_ptr<Player> getCurrentPlayer() const;
 };
