@@ -54,7 +54,7 @@ Server::~Server()
     {
         close(server_fd);
     }
-    cout << "Serwer zamknięty poprawnie." << endl;
+    cout << "\nSerwer zamknięty poprawnie" << endl;
 }
 
 void Server::run()
@@ -105,7 +105,7 @@ void Server::createRoom(shared_ptr<Player> host)
     string roomName = generateRoomCode();
     while (this->rooms.find(roomName) != this->rooms.end())
     {
-        cout << "Pokoj o podanej nazwie istnieje" << endl;
+        // cout << "Pokoj o podanej nazwie istnieje" << endl;
         roomName = generateRoomCode();
     }
 

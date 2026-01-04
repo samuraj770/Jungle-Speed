@@ -61,6 +61,7 @@ void GameRoom::checkResult()
             gameState->removePlayer(winner);
             // broadcastMessage(string("GAME_OVER"));
             // endGame();
+            // return;
         }
     }
 
@@ -103,7 +104,7 @@ bool GameRoom::addPlayer(shared_ptr<Player> newPlayer)
         {
             string msg = string("ACCEPT_JOIN") + " " +
                          to_string(this->isGameActive()) + " " +               // kod czy aktywny gra
-                         to_string(gameState->getActivePlayersCount()) + " " + // liczba aktywnych graczy @TODO
+                         to_string(gameState->getActivePlayersCount()) + " " + // liczba aktywnych graczy
                          to_string(this->getPlayerCount()) +                   // liczba graczy w pokoju
                          this->getPlayerNicksString();
             newPlayer->sendMessage(msg);
@@ -121,7 +122,7 @@ bool GameRoom::addPlayer(shared_ptr<Player> newPlayer)
         {
             msg = string("ACCEPT_JOIN") + " " +
                   to_string(this->isGameActive()) + " " + // kod czy aktywny gra
-                  "0" + " " +                             // liczba aktywnych graczy @TODO
+                  "0" + " " +                             // liczba aktywnych graczy
                   to_string(this->getPlayerCount()) +     // liczba graczy w pokoju
                   this->getPlayerNicksString();
             newPlayer->sendMessage(msg);
